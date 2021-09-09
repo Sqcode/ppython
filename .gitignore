@@ -6,6 +6,7 @@ package-lock.json
 jsconfig.json
 
 /images
+/files
 /国外疫情数据
 __pycache__
 
