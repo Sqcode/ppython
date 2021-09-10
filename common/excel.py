@@ -17,19 +17,16 @@ class excel():
         
         if sheet:
             # row = [y for item in list for y in item]
-            # print(row)
             # sheet.append(row)
             for i in range(len(list)):
-                ll = []
+                # ll = []
                 row = list[i]
-                # print(row)
                 for y in range(len(row)):
                     content = row[y]
-                    # print(content)
                     if with_url == y and i > 0:
                         # print(i,y)
                         # 替换成链接
-                        wu = '=HYPERLINK("{}", "{}")'.format(row[y+1], content)
+                        # wu = '=HYPERLINK("{}", "{}")'.format(row[y+1], content)
                         list[i][y] = '=HYPERLINK("{}", "{}")'.format(row[y+1], content)
                         # v = self.wbac.cell(row=i+1, column=y+1).value = '=HYPERLINK("{}", "{}")'.format(row[y+1], content)
                 #         ll.append(wu)
@@ -42,16 +39,14 @@ class excel():
 
 
 
-    def write_row_url(self, list, sheet_name='Sheet'):
-        # sheets = self.get_sheet_names()
-        sheet = self.wb.get_sheet_by_name(sheet_name)
-        #sheet = wb.get_sheet_by_name(sheets[0])
-        
-        if sheet:
-            row = [y for item in list for y in item]
-            print(row)
-            sheet.append(row)
-        
+    # def write_row_url(self, list, sheet_name='Sheet'):
+    #     # sheets = self.get_sheet_names()
+    #     sheet = self.wb.get_sheet_by_name(sheet_name)
+    #     #sheet = wb.get_sheet_by_name(sheets[0])
+    #     if sheet:
+    #         row = [y for item in list for y in item]
+    #         print(row)
+    #         sheet.append(row)
 
     def new_sheet(self, name):
         self.wb.create_sheet(name)
