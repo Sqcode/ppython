@@ -1,3 +1,10 @@
+import sys, os
+__dir__ = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(__dir__)
+sys.path.append(os.path.abspath(os.path.join(__dir__, '../common')))
+# print(__dir__)
+from util import mkdir
+
 import requests
 import traceback
 import selenium
@@ -11,8 +18,6 @@ import re
 import os
 import time
 from bs4 import BeautifulSoup
-
-from util import mkdir
 
 
 # 微软bing的背景图片
@@ -36,7 +41,7 @@ img = ""
 try:
     a = WebDriverWait(driver, 20, 0.5).until(EC.presence_of_element_located(locator))
     #print ("WebDriverWait", a)
-    filedir = mkdir("")
+    filedir = mkdir()
     for i in range(8):
         #/th?id=OHR.Heliodoxa_ZH-CN9872355419_UHD.jpg&rf=LaDigue_UHD.jpg&pid=hp&w=1920&h=1080&rs=1&c=4
         # 可以去更改w,h

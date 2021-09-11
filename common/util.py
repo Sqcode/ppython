@@ -1,4 +1,6 @@
 import os, time, requests, random, telnetlib
+__dir__ = os.path.dirname(os.path.abspath(__file__))
+# print(__dir__)
 
 def get_headers(localhost=True, refer="https://www.baidu.com", host=None):
 
@@ -30,6 +32,7 @@ def get_html(url, ret_type="text", timeout=50, encoding="utf-8"):
 	headers = get_headers()
 	res = requests.get(url, headers=headers, timeout=timeout)
 	res.encoding = encoding
+	print(res.status_code)
 	# print(res.text)
 	if ret_type == "text":
 		return res.text
@@ -39,7 +42,7 @@ def get_html(url, ret_type="text", timeout=50, encoding="utf-8"):
 		return res.json()
 
 # 创建图片文件夹
-def mkdir(path='./images/' + str(round(time.time() * 1000)) + '/'):
+def mkdir(path=os.path.join(__dir__, '../images/') + str(round(time.time() * 1000)) + '/'):
 	"""
 	新建图片文件夹
 	:param:path The file path - 文件路径 
@@ -52,7 +55,7 @@ def mkdir(path='./images/' + str(round(time.time() * 1000)) + '/'):
 		#print ("---  There is this folder!  ---")
 	return path
 
-def download_img(src, filename=str(round(time.time() * 1000)), filedir='./images/', domain=None):
+def download_img(src, filename=str(round(time.time() * 1000)), filedir=os.path.join(__dir__, '../images/'), domain=None):
 	"""
 	图片下载
 	:param:src The image http url - 图片链接
@@ -82,7 +85,6 @@ def check_ip_port(ip_port):
                 f.write(ip+':'+port+'\n')
     print("阶段性检测完毕")
 
-
 def check_proxy(ip_port):
 	for item in ip_port:
 		ip = item["ip"]
@@ -101,10 +103,11 @@ def check_proxy(ip_port):
 			print(e)
 
 if __name__ == "__main__":
+	print(__dir__)
 	#check_ip_port([{'ip': '202.109.157.60', 'port': '9000'}])
 	#check_ip_port([{'ip': '192.168.179.129', 'port': '52856'}])
 	# check_proxy([{'ip': '192.168.17.131', 'port': '8989'}])
-	check_proxy([{'ip': '222.74.202.231', 'port': '8080'}])
+	#check_proxy([{'ip': '222.74.202.231', 'port': '8080'}])
 	# 222.74.202.231:8080
 	# get_html('http://www.netbian.com/mei/index.htm', encoding='gbk')
 	#mkdir(")
