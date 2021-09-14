@@ -1,4 +1,5 @@
-import os, time, requests, random, telnetlib
+import os, time, requests, random, telnetlib, json
+from bs4 import BeautifulSoup
 __dir__ = os.path.dirname(os.path.abspath(__file__))
 # print(__dir__)
 
@@ -102,8 +103,37 @@ def check_proxy(ip_port):
 		except Exception as e:
 			print(e)
 
+class JarProjectPath:
+    @staticmethod
+    def project_root_path(project_name=None):
+        """
+        获取当前项目根路径
+        :param project_name:
+        :return: 根路径
+        """
+        PROJECT_NAME = 'AutoFrame' if project_name is None else project_name
+        project_path = os.path.abspath(os.path.dirname(__file__))
+        root_path = project_path[:project_path.find("{}\\".format(PROJECT_NAME)) + len("{}\\".format(PROJECT_NAME))]
+        print('当前项目名称：{}\r\n当前项目根路径：{}'.format(PROJECT_NAME, root_path))
+        return root_path
+
 if __name__ == "__main__":
 	print(__dir__)
+
+	print(5 + float(random.randint(1,100)) /20)
+	# html = get_html('http://www.netbian.com/mei/index.htm', encoding='gbk')
+	# soup = BeautifulSoup(html, 'html.parser')
+	# print(soup.select('title'), soup.select('title')[0].text)
+	# title = soup.select('title')[0].text
+	# print('美女' in title, title.find('美女'))
+
+	# print(html.find('doctype'))
+	# print(html[0,2])
+	# start = html.find('<title>')
+	# end = html.find('</title>')
+	# print(type(start), start, type(end), end)
+	# print(html[start, end])
+	# print(type(html.title))
 	#check_ip_port([{'ip': '202.109.157.60', 'port': '9000'}])
 	#check_ip_port([{'ip': '192.168.179.129', 'port': '52856'}])
 	# check_proxy([{'ip': '192.168.17.131', 'port': '8989'}])

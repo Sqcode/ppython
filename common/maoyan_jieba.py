@@ -1,3 +1,4 @@
+from pyecharts.charts.base import default
 from wordcloud import WordCloud, STOPWORDS
 import pandas as pd
 import jieba
@@ -6,31 +7,42 @@ import seaborn as sns
 from pyecharts.charts import Geo
 from pyecharts import options as opts
 from pyecharts.globals import ChartType, SymbolType
-
-import sys, os, time
+from pyecharts.exceptions import NonexistentCoordinatesException
+import sys, os, time, util, win_w_h
+import json
 __dir__ = os.path.dirname(os.path.abspath(__file__))
 # sys.path.append(__dir__)
 # sys.path.append(os.path.abspath(os.path.join(__dir__, '../common')))
 
-back_coloring_path = r'C:\Users\dyjx\Desktop\images\leimu.png' # 设置背景图片路径
+back_coloring_path = r'C:\Users\dyjx\Desktop\py\images\bk.jpg' # 设置背景图片路径
 fonts_path = 'C:\Windows\Fonts\simkai.ttf' # 为matplotlib设置中文字体路径没
 
+root_path = util.JarProjectPath.project_root_path('py')
+
 def analysis():
-    path = r'C:\Users\dyjx\Desktop\py\files\movie.txt'
+    path = r'C:\Users\dyjx\Desktop\py\files\1631602350522.txt'
     with open(path, encoding='UTF-8') as f:
         data = pd.read_csv(f,sep=',',header=None,encoding='UTF-8',names=['date','nickname','city','rate','comment'])
-
-    
     
     city = data.groupby(['city'])
     rate_group = city['rate']
     city_com = city['city'].agg(['count'])
     city_com.reset_index(inplace=True)
-    data_map = [(city_com['city'][i], int(city_com['count'][i])) for i in range(0,city_com.shape[0])]
-    print(data_map)
 
+    
+
+    data_map = [(city_com['city'][i], int(city_com['count'][i])) for i in range(0,city_com.shape[0])]
+    # print(data_map)
+
+    ddict = dict(data_map)
+    # 去掉坐标不存在
+    ddict.pop('普洱')
+    ddict.pop('海西')
+    ddict.pop('黔南')
+
+    # print(data_map, '------------', ddict, '------------', [(key, val) for key, val in ddict.items()])
     # 地图划分
-    geo_heatmap_dynamic(data_map)
+    geo_heatmap_dynamic([(key, val) for key, val in ddict.items()])
     # 云词
     jb(data)
 
@@ -62,13 +74,13 @@ def jb(data):
                 random_state=50)
     #将分词后数据传入云图
     wc.generate_from_text(wl_space_split)
-    plt.imshow(wc)
-    plt.axis('off')#不显示坐标轴
-    plt.show()
+    # plt.imshow(wc)
+    # plt.axis('off')#不显示坐标轴
+    # plt.show()
     #保存结果到本地
-    # wc.to_file(r'xuke_wordcloud.jpg')
+    wc.to_file(f'{root_path}files/wordcloud{str(round(time.time() * 1000))}.jpg')
 
-# 测试
+# 生成评论分布图
 def geo_heatmap_dynamic(data) -> Geo:
 
     # test_data_ = [("测试点1", 116.512885, 39.847469), ("测试点2", 125.155373, 42.933308), ("测试点3", 87.416029, 43.477086)]
@@ -82,31 +94,64 @@ def geo_heatmap_dynamic(data) -> Geo:
     # json_str = json.dumps(json_data, ensure_ascii=False, indent=4)
     # with open('test_data.json', 'w', encoding='utf-8') as json_file:
     #     json_file.write(json_str)
-
-    c = (
-        Geo()
-        .add_schema(maptype="china", itemstyle_opts=opts.ItemStyleOpts(color="#eeeeee", border_color="#111"),)
-        # .add_coordinate_json(json_file='test_data.json') # 加入自定义的点
-        .add(
-            "xxx",
-            # [list(z) for z in zip(province_name, province_count)],
-            # [('广州', 100), ("乌鲁木齐", 66), ("济南", 99), ("武汉", 88)],
-            data,
-            # HEATMAP MAP GEO
-            type_=ChartType.EFFECT_SCATTER, 
-            symbol_size = 15    #标记大小
+    wh = win_w_h.get_real_resolution_ratio(1.5)
+    print(wh, wh[0], wh[1])
+    try:
+        ops = opts.InitOpts(width = f'{wh[0]}px', height = f'{wh[1]}px')
+        c = (
+            Geo(init_opts= ops)
+            .add_schema(maptype="china", itemstyle_opts=opts.ItemStyleOpts(color="#eeeeee", border_color="#111"),)
+            # .add_coordinate_json(json_file='test_data.json') # 加入自定义的点
+            .add(
+                "评论来源地区分布",
+                # [list(z) for z in zip(province_name, province_count)],
+                # [('广州', 100), ("乌鲁木齐", 66), ("济南", 99), ("武汉", 88)],
+                data,
+                # HEATMAP MAP GEO
+                type_=ChartType.EFFECT_SCATTER, 
+                symbol_size = 15    #标记大小
+            )
+            .set_series_opts(label_opts=opts.LabelOpts(is_show=False))
+            .set_global_opts(
+                visualmap_opts=opts.VisualMapOpts(is_piecewise=True, max_ = 100),   # is_piecewise=True 表示切分legend范围
+                title_opts=opts.TitleOpts(title="")
+            )
         )
-        .set_series_opts(label_opts=opts.LabelOpts(is_show=False))
-        .set_global_opts(
-            visualmap_opts=opts.VisualMapOpts(is_piecewise=True, max_ = 100),   # is_piecewise=True 表示切分legend范围
-            title_opts=opts.TitleOpts(title="地区划分")
-        )
-    )
-    c.render(path=os.path.join(__dir__, f'../files/geo/geo{str(round(time.time() * 1000))}.html'))
+        c.render(path=os.path.join(__dir__, f'../files/geo/geo{str(round(time.time() * 1000))}.html'))
+    except NonexistentCoordinatesException as e:
+        print(e)
+        
     # return c
 
+def get_movie_name(movie_id):
+    html = util.get_html(f'http://api.maoyan.com/mmdb/movie/v5/{movie_id}.json')
+    data = json.loads(html)['data']['movie']
+
+    return data
+
+def get_movies(keyword):
+    html = util.get_html(f'https://maoyan.com/ajax/suggest?kw={keyword}')
+    # print(html)
+    mvs = json.loads(html)['movies']['list']
+
+    if (len(mvs) == 0):
+        raise MyException(f'找不到{keyword}')
+    return mvs[0]
+
+class MyException(Exception): #让MyException类继承Exception
+    def __init__(self,msg):
+        self.msg = msg
+
 if __name__ =='__main__':
-    analysis()
+    #analysis(movie_id)
+    # mv = get_movie_name('1263235')
+    # print(type(mv))
+    # print(mv['nm'])
+
+    mv = get_movies('失控玩家')
+    #print(mv.get('videoName', default='找不到字段'))
+
+
     # print(os.path.join(__dir__, f'../files/geo/geo{str(round(time.time() * 1000))}.html'))
     # c = geo_heatmap_dynamic()
     # c.render(path=os.path.join(__dir__, f'../files/geo/geo{str(round(time.time() * 1000))}.html'))
