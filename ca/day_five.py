@@ -52,10 +52,10 @@ class My_Class(object):
 # # 通过类的对象调用
 # my_class_dom.class_method()
 
-my_class = My_Class()
+# my_class = My_Class()
 #my_class.instance_method()
 # 通过对象访问
-my_class.static_method()
+# my_class.static_method()
 # 类名直接访问
 #My_Class.static_method()
 
@@ -187,12 +187,12 @@ def ddate():
 # 装饰器
 def run_time(func):
     # 这里的 wrapper 函数名可以为任意名称
-    def wrapper():
+    def wrapper(start):
         s_time = time.perf_counter()
-        func()
+        res = func(start)
         e_time = time.perf_counter()
         print(f"func --- {func.__name__}, runtime --- {e_time-s_time}")
-        
+        return res
     return wrapper
 
 def eenumerate():
@@ -230,10 +230,11 @@ def llambda():
 
 # += 写法
 @run_time
-def m0():
-    s = ' '
-    for n in range(0, 100000):
-        s += str(n)
+def m0(start):
+    s = 0
+    for n in range(start, 100):
+        s += n
+    return (s)
 
 # join 写法
 def m1():
@@ -322,5 +323,6 @@ def tuple_append():
 # r = redis.Redis(connection_pool=pool)
 # print(r.get('note_1'))
 
-# if __name__ == '__main__':
-#     m0()
+if __name__ == '__main__':
+    a = m0(1)
+    print(a)

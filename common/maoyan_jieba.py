@@ -123,32 +123,13 @@ def geo_heatmap_dynamic(data) -> Geo:
         
     # return c
 
-def get_movie_name(movie_id):
-    html = util.get_html(f'http://api.maoyan.com/mmdb/movie/v5/{movie_id}.json')
-    data = json.loads(html)['data']['movie']
-
-    return data
-
-def get_movies(keyword):
-    html = util.get_html(f'https://maoyan.com/ajax/suggest?kw={keyword}')
-    # print(html)
-    mvs = json.loads(html)['movies']['list']
-
-    if (len(mvs) == 0):
-        raise MyException(f'找不到{keyword}')
-    return mvs[0]
-
 class MyException(Exception): #让MyException类继承Exception
     def __init__(self,msg):
         self.msg = msg
 
 if __name__ =='__main__':
+    print(1)
     #analysis(movie_id)
-    # mv = get_movie_name('1263235')
-    # print(type(mv))
-    # print(mv['nm'])
-
-    mv = get_movies('失控玩家')
     #print(mv.get('videoName', default='找不到字段'))
 
 

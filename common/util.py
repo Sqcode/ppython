@@ -5,10 +5,10 @@ __dir__ = os.path.dirname(os.path.abspath(__file__))
 
 def get_headers(localhost=True, refer="https://www.baidu.com", host=None):
 
-	ua = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36"
+	ua = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36"
 	if not localhost:
 		uas = [
-			"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36",
+			"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36",
 			"Mozilla/5.0 (compatible; Baiduspider/2.0; +http://www.baidu.com/search/spider.html)",
 			"Mozilla/5.0 (compatible; Baiduspider-render/2.0; +http://www.baidu.com/search/spider.html)",
 			"Baiduspider-image+(+http://www.baidu.com/search/spider.htm)",
@@ -103,6 +103,7 @@ def check_proxy(ip_port):
 		except Exception as e:
 			print(e)
 
+# 获取当前项目根路径
 class JarProjectPath:
     @staticmethod
     def project_root_path(project_name=None):
@@ -114,8 +115,19 @@ class JarProjectPath:
         PROJECT_NAME = 'AutoFrame' if project_name is None else project_name
         project_path = os.path.abspath(os.path.dirname(__file__))
         root_path = project_path[:project_path.find("{}\\".format(PROJECT_NAME)) + len("{}\\".format(PROJECT_NAME))]
-        print('当前项目名称：{}\r\n当前项目根路径：{}'.format(PROJECT_NAME, root_path))
+        # print('当前项目名称：{}\r\n当前项目根路径：{}'.format(PROJECT_NAME, root_path))
         return root_path
+
+# 装饰器，函数运行时间
+def run_time(func):
+    # 这里的 wrapper 函数名可以为任意名称
+    def wrapper(*args):
+        s_time = time.perf_counter()
+        res = func(*args)
+        e_time = time.perf_counter()
+        print(f"func --- {func.__name__}, runtime --- {e_time-s_time}")
+        return res
+    return wrapper
 
 if __name__ == "__main__":
 	print(__dir__)
