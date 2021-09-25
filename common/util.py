@@ -33,7 +33,7 @@ def get_html(url, ret_type="text", timeout=50, encoding="utf-8"):
 	headers = get_headers()
 	res = requests.get(url, headers=headers, timeout=timeout)
 	res.encoding = encoding
-	print(res.status_code)
+	# print(res.status_code)
 	# print(res.text)
 	if ret_type == "text":
 		return res.text
@@ -145,6 +145,7 @@ def yinjie(word):
     return s
 
 if __name__ == "__main__":
+	print(pinyin('怒火·重案'))
 	print(__dir__)
 	print(5 + float(random.randint(1,100)) /20)
 	# html = get_html('http://www.netbian.com/mei/index.htm', encoding='gbk')

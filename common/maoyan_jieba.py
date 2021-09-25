@@ -83,8 +83,8 @@ def jb(data, filename=str(round(time.time() * 1000))):
     #参数分别是指定字体/背景颜色/最大的词的大小,使用给定图作为背景形状
     wc = WordCloud(width=1024,height=768,background_color='white',
                 mask = backgroud_Image,font_path=fonts_path,
-                stopwords=stopwords, max_font_size=100,
-                random_state=50)
+                stopwords=stopwords, max_font_size=200,
+                random_state=40)
     #将分词后数据传入云图
     wc.generate_from_text(wl_space_split)
     # plt.imshow(wc)
@@ -138,7 +138,7 @@ def geo_heatmap_dynamic(data, filename=str(round(time.time() * 1000))) -> Geo:
     # return c
 
 if __name__ =='__main__':
-    filepath = r'files\关于我妈的一切.txt'
+    filepath = r'files\我的青春有个你.txt'
     analysis(filepath)
     # print(util.pinyin('我爱你'))
     print(1)

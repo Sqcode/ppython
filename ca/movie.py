@@ -2,7 +2,7 @@ import sys, os
 __dir__ = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(__dir__)
 sys.path.append(os.path.abspath(os.path.join(__dir__, '../common')))
-import util
+import util, maoyan_jieba
 from exp import SkipException
 import requests, json, time, random, slide_selenium, threading
 from bs4 import BeautifulSoup
@@ -141,7 +141,7 @@ def do_scrawl(url, movie_name=f'movie{str(round(time.time() * 1000))}'):
 
     root_path = util.JarProjectPath.project_root_path('py')
     filepath = root_path + f'files/{movie_name}.txt'
-
+    print(f'共{total}条评论，每页{size}条，可爬{pages}页，随机预设【{thrs}】个线程，每个线程需爬取【{works}】页')
     # 多线程爬取
     l = []
     # 线程从1开始，各加1
@@ -242,5 +242,12 @@ class ThreadCrawl(threading.Thread):
         self.func
         
 if __name__ =='__main__':
-    print(get_movies('明日之战'))
-    # scrawl_mv('关于我妈的一切')
+    # print(get_movies('怒火·重案'))
+    movie_name = '我的青春有个你'
+    scrawl_mv(movie_name)
+
+    filepath = f'files/{movie_name}.txt'
+    
+    if os.path.exists(filepath):
+        print(os.path.abspath(filepath))
+        maoyan_jieba.analysis(os.path.abspath(filepath))
