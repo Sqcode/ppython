@@ -23,8 +23,8 @@ t2 = threading.Thread(target=consumer, args=('CSDN 账户 A',))
 t3 = threading.Thread(target=consumer, args=('CSDN 账户 B',))
 
 t1.start()
-t2.start()
-t3.start()
+# t2.start()
+# t3.start()
 
 # # 初始化一个空队列，不限制长度
 # q = queue.Queue()
