@@ -37,17 +37,6 @@ class excel():
                 # sheet.append(ll)
                 sheet.append(row)
 
-
-
-    # def write_row_url(self, list, sheet_name='Sheet'):
-    #     # sheets = self.get_sheet_names()
-    #     sheet = self.wb.get_sheet_by_name(sheet_name)
-    #     #sheet = wb.get_sheet_by_name(sheets[0])
-    #     if sheet:
-    #         row = [y for item in list for y in item]
-    #         print(row)
-    #         sheet.append(row)
-
     def new_sheet(self, name):
         self.wb.create_sheet(name)
 
