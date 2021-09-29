@@ -1,3 +1,8 @@
+import sys, os
+__dir__ = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(__dir__)
+sys.path.append(os.path.abspath(os.path.join(__dir__, '../common')))
+import util
 import requests
 from bs4 import BeautifulSoup
 from email.mime.text import MIMEText   # 定义邮件内容
@@ -20,36 +25,37 @@ def get_html():
         "Referer": "https://www.baidu.com"
     }
     
-    res = requests.get("https://s.weibo.com/top/summary", headers=headers)
-    # print(res.text)
-    return analysis_html(res.text)
+    res = requests.get("https://s.weibo.com/top/summary?cate=realtimehot", headers=util.get_headers(localhost=False))
+    print(res.text)
+    # return analysis_html(res.text)
 
 def analysis_html(html):
     soup = BeautifulSoup(html, 'lxml')
     data = soup.find(name="tbody")
-    items = data.find_all(name='tr')  # 过滤到全部数据
     send_msgs = []
-    for item in items:
-        top = item.find(attrs={"class": "td-01"}).text  # 排序
-        if top == "":
-            top = '置顶'
-        content = item.find(attrs={"class": "td-02"})
+    if data:
+        items = data.find_all(name='tr')  # 过滤到全部数据
+        for item in items:
+            top = item.find(attrs={"class": "td-01"}).text  # 排序
+            if top == "":
+                top = '置顶'
+            content = item.find(attrs={"class": "td-02"})
 
-        url = 'https://s.weibo.com/' + content.find('a')['href']
-        # print(url)
+            url = 'https://s.weibo.com/' + content.find('a')['href']
+            # print(url)
 
-        title_content = content.contents
-        title = "" # 获取标题
-        readers = ""
-        if len(title_content) > 3:
-            title = title_content[1].text
-            readers = title_content[3].text
-        else:
-            title = title_content[1].text
-            readers = "0"
-        level = item.find(attrs={"class": "td-03"}).text  # 热度标签
-        send_msgs.append ((top,url,title,readers,level))
-    # print(send_msgs)
+            title_content = content.contents
+            title = "" # 获取标题
+            readers = ""
+            if len(title_content) > 3:
+                title = title_content[1].text
+                readers = title_content[3].text
+            else:
+                title = title_content[1].text
+                readers = "0"
+            level = item.find(attrs={"class": "td-03"}).text  # 热度标签
+            send_msgs.append ((top,url,title,readers,level))
+        # print(send_msgs)
     return send_msgs
 
 def wb_send_email_param(server, sender, receivers):
@@ -71,39 +77,42 @@ def wb_send_email_param(server, sender, receivers):
     subject = f"{rq} 微博热搜"
     # 邮件html内容，需要把热搜的爬取到的数据进行格式化
     data = get_html()
-    print("获取内容...", len(data))
-    table = "<table>"
-    for item in data:
-        # table += f"<tr><td><font size='1' color='#f26d5f'>{item[0]}</font>:<a href='{item[1]}'><font size='2'>{item[2]}</font></a>---{item[3]}【{item[4]}】</td></tr>"
-        str = ''
-        if item[3]:
-            str = f"---{item[3]}"
-        if item[4]:
-            str = f"---{item[3]}【{item[4]}】"
-        # print(item[0], item[1], item[2], item[3], item[4], str)
-        tr = ("<tr><td><font size='2' color='#f26d5f'>" + item[0]
-        +"</font>:<a href='" + item[1] + "'><font size='3'>" + item[2] + "</font></a>" + str +"</td></tr>")
-        
-        table += tr
-    table += "</table>"
-    # print(table)
-    content = table
-    msg = MIMEText(content, 'html', 'utf-8') # 邮件的正文
-    msg['Subject'] = Header(subject, 'utf-8') # 邮件的标题
-    msg['From'] = from_addr # 邮件发送方
-    # msg['To'] = to_addr # 邮件接收方，发送给一人
-    msg['To']=','.join(to_addrs)# 邮件接收方，发送给多人
+    if data:
+        print("获取内容...", len(data))
+        table = "<table>"
+        for item in data:
+            # table += f"<tr><td><font size='1' color='#f26d5f'>{item[0]}</font>:<a href='{item[1]}'><font size='2'>{item[2]}</font></a>---{item[3]}【{item[4]}】</td></tr>"
+            str = ''
+            if item[3]:
+                str = f"---{item[3]}"
+            if item[4]:
+                str = f"---{item[3]}【{item[4]}】"
+            # print(item[0], item[1], item[2], item[3], item[4], str)
+            tr = ("<tr><td><font size='2' color='#f26d5f'>" + item[0]
+            +"</font>:<a href='" + item[1] + "'><font size='3'>" + item[2] + "</font></a>" + str +"</td></tr>")
+            
+            table += tr
+        table += "</table>"
+        # print(table)
+        content = table
+        msg = MIMEText(content, 'html', 'utf-8') # 邮件的正文
+        msg['Subject'] = Header(subject, 'utf-8') # 邮件的标题
+        msg['From'] = from_addr # 邮件发送方
+        # msg['To'] = to_addr # 邮件接收方，发送给一人
+        msg['To']=','.join(to_addrs)# 邮件接收方，发送给多人
 
-    smtp = smtplib.SMTP_SSL(smtpserver, 465)# SSL协议端口号要使用465
-    smtp.helo(smtpserver) # helo向邮箱标识用户身份
-    smtp.ehlo(smtpserver) # 服务器返回结果确认
-    smtp.login(from_addr, password)# 登录邮箱服务器，输入自己的账号和密码
+        smtp = smtplib.SMTP_SSL(smtpserver, 465)# SSL协议端口号要使用465
+        smtp.helo(smtpserver) # helo向邮箱标识用户身份
+        smtp.ehlo(smtpserver) # 服务器返回结果确认
+        smtp.login(from_addr, password)# 登录邮箱服务器，输入自己的账号和密码
 
-    print("发送中...")
-    smtp.sendmail(from_addr, to_addrs, msg.as_string())# 邮件发送多人
-    # smtp.sendmail(from_addr, to_addr, msg.as_string())# 发送给个人的邮件
-    smtp.quit()
-    print("发送完毕")
+        print("发送中...")
+        smtp.sendmail(from_addr, to_addrs, msg.as_string())# 邮件发送多人
+        # smtp.sendmail(from_addr, to_addr, msg.as_string())# 发送给个人的邮件
+        smtp.quit()
+        print("发送完毕")
+    else:
+        print('未获取到内容')
 
 def wb_send_email():
     server = '@qq.com'

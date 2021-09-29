@@ -1,5 +1,5 @@
 
-import os, sys
+import os
 
 def file_name(file_dir):   
     for root, dirs, files in os.walk(file_dir):  
@@ -35,17 +35,3 @@ if __name__ == '__main__':
     file_name(file_dir)
     # list_name = listdir(filepath, [])
     # print(list_name)
-
-
-# from selenium import webdriver
-
-# url = 'https://s.weibo.com/top/summary'
-# option = webdriver.ChromeOptions()
-# option.add_experimental_option("excludeSwitches", ['enable-automation', 'enable-logging'])
-# driver = webdriver.Chrome(chrome_options=option)
-# driver.get(url)
-# # 网页源码
-# page = driver.page_source
-# print(page)
-# # 关闭浏览器
-# driver.close()
