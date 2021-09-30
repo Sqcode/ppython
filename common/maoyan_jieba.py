@@ -53,6 +53,8 @@ def analysis(filepath):
         ddict.pop('延边')
     if ddict.__contains__('陵水'):
         ddict.pop('陵水')
+    if ddict.__contains__('凉山'):
+        ddict.pop('凉山')
 
     # print(data_map, '------------', ddict, '------------', [(key, val) for key, val in ddict.items()])
     # 地图划分

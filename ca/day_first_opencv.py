@@ -2,6 +2,12 @@ import numpy as np
 import cv2
 import matplotlib.pylab as plt
 
+import sys, os
+__dir__ = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(__dir__)
+sys.path.append(os.path.abspath(os.path.join(__dir__, '../common')))
+import exp
+
 def draw_img():
     # print('默认一维为数组:', np.arange(5))
     # print('自定义起点一维数组:',np.arange(1, 5))
@@ -71,7 +77,7 @@ def plt_show_demo():
 
     plt.show()
 
-def plt_show(images,titles):
+def plt_show(images, titles):
     for i in range(len(images)):
         plt.subplot(3, 3, i+1)
         # print(isinstance(titles[i], list))
@@ -129,14 +135,24 @@ def adaptive_threshold(src):
     #plt.subplots_adjust(wspace=20)
     plt.show()
 
-def img_add():
-    im1 = cv2.imread(path1)
-    im2 = cv2.imread(path2)
-    res = cv2.add(im1, im2)
-    #res = cv2.add(im2, im1)
+def img_add(file1, file2, ):
+    """
+    ！！！俩图片 必须尺寸相同！！！
+    """
+    im1 = cv2.imread(file1)
+    im2 = cv2.imread(file2)
+
+    h1, w1 = im1.shape[:2]
+    h2, w2 = im2.shape[:2]
+
+    if h1 != h2 or w1 != w2:
+        raise exp.MyException('图片尺寸不相同，无法合并')
+
+    res = cv2.add(im2, im1)
     cv2.imshow("add", res)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+    return cv2.add(im1, im2)
 
 def mask_demo():
     # cv.imshow("mask_demo", src)
@@ -281,21 +297,25 @@ def roi():
     # cv2.destroyAllWindows()
 
 #avator
-path = 'C:/Users/dyjx/Desktop/images/pig.jpg'
-path1 = 'C:/Users/dyjx/Desktop/images/biu.jpg'
-path2 = 'C:/Users/dyjx/Desktop/images/biubiu.jpg'
-path3 = 'C:/Users/dyjx/Desktop/images/leimu.png'
-path4 = 'C:/Users/dyjx/Desktop/images/leimu.png'
-img1 = cv2.imread(path1)
-img2 = cv2.imread(path2)
+path = r'static/pig.jpg'
+path1 = r'static/biu.jpg'
+path2 = r'static/biubiu.jpg'
+path3 = r'static/blove.jpg'
+path4 = r'static/logo.png'
+
+# img1 = cv2.imread(path1)
+# img2 = cv2.imread(path2)
     # cv2.waitKey(0)
     # cv2.destroyAllWindows()
 if __name__ == '__main__':
-    roi()
+    # roi()
     # gradient()
     # add_weighted()
     # mask_demo()
-    # img_add()
+    a = img_add(path3, path4)
+    b = img_add(path4, path3)
+    # plt_show([a, b], ['3+4', '4+3'])
+
     # channel()
     # plt_show()
     # adaptive_threshold(cv2.imread(path))

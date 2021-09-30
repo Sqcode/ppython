@@ -1,8 +1,14 @@
-import os, time, requests, random, telnetlib, json, pypinyin
+import os, time, requests, random, telnetlib, json, pypinyin, cv2
 from bs4 import BeautifulSoup
+from email.mime.text import MIMEText   # 定义邮件内容
+from email.header import Header # 定义邮件标题
+import smtplib
+import numpy as np
+import matplotlib.pylab as plt
 __dir__ = os.path.dirname(os.path.abspath(__file__))
 # print(__dir__)
 
+# 获取请求头
 def get_headers(localhost=True, refer="https://www.baidu.com", host=None):
 
 	ua = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36"
@@ -29,6 +35,7 @@ def get_headers(localhost=True, refer="https://www.baidu.com", host=None):
 	}
 	return headers
 
+# 获取html
 def get_html(url, ret_type="text", timeout=50, encoding="utf-8"):
 	headers = get_headers()
 	res = requests.get(url, headers=headers, timeout=timeout)
@@ -86,6 +93,7 @@ def check_ip_port(ip_port):
                 f.write(ip+':'+port+'\n')
     print("阶段性检测完毕")
 
+# 代理检测函数
 def check_proxy(ip_port):
 	for item in ip_port:
 		ip = item["ip"]
@@ -144,10 +152,74 @@ def yinjie(word):
         s = s + ''.join(i) + " "
     return s
 
+# 发送邮件，QQ
+def send_email(data, receivers, server='@qq.com', sender='627758338'):
+	"""
+	:param :data 要发送的内容
+	:param :receivers 接受人数组
+	 example - wb_send_email_param(['570300991'])
+	"""
+	rq = time.strftime("%Y-%m-%d %H:%M:%S") # 发送时间
+	from_addr = sender + server # 发送的邮箱
+	# smtpserver="smtp.163.com" # 发送邮箱SMTP服务器地址
+	smtpserver = "smtp.qq.com" # 发送邮箱SMTP服务器地址
+	# password = "hbmfmxtfezekbcfa"# 密码，填写自己的密码即可，163邮箱和网页登录的邮箱不同
+	password = "qaerbqssfcfpbebb"# 密码，填写自己的密码即可，163邮箱和网页登录的邮箱不同
+	# 接收邮箱的账号
+	# to_addr = receiver + server
+	to_addrs = []
+	for rv in receivers:
+		receiver = rv + server
+		print(receiver)
+		to_addrs.append(receiver)
+
+	# 邮件的标题
+	subject = f"{rq} 微博热搜"
+	# 发送内容
+	if data:
+		msg = MIMEText(data, 'html', 'utf-8') # 邮件的正文
+		msg['Subject'] = Header(subject, 'utf-8') # 邮件的标题
+		msg['From'] = from_addr # 邮件发送方
+		# msg['To'] = to_addr # 邮件接收方，发送给一人
+		msg['To']=','.join(to_addrs)# 邮件接收方，发送给多人
+
+		smtp = smtplib.SMTP_SSL(smtpserver, 465)# SSL协议端口号要使用465
+		smtp.helo(smtpserver) # helo向邮箱标识用户身份
+		smtp.ehlo(smtpserver) # 服务器返回结果确认
+		smtp.login(from_addr, password)# 登录邮箱服务器，输入自己的账号和密码
+
+		print("发送中...")
+		smtp.sendmail(from_addr, to_addrs, msg.as_string())# 邮件发送多人
+		# smtp.sendmail(from_addr, to_addr, msg.as_string())# 发送给个人的邮件
+		smtp.quit()
+		print("发送完毕")
+	else:
+		print('未获取到内容')
+
+def plt_show(images, titles):
+    for i in range(len(images)):
+        plt.subplot(3, 3, i+1)
+        # print(isinstance(titles[i], list))
+        if isinstance(titles[i], list):
+            # print(titles[i][1])
+            if titles[i][1]:
+                b, g, r = cv2.split(images[i])
+                srcImage_new = cv2.merge([r, g, b])
+                plt.imshow(srcImage_new)
+        else:
+            plt.imshow(images[i], 'gray')
+        plt.title(titles[i] if titles[i] else i)
+        plt.xticks([])
+        plt.yticks([])
+
+    plt.show()
 if __name__ == "__main__":
-	print(pinyin('怒火·重案'))
-	print(__dir__)
-	print(5 + float(random.randint(1,100)) /20)
+	print("__main__")
+	send_email('1111', ['570300991'])
+	# print(pinyin('怒火·重案'))
+	# print(__dir__)
+	# print(5 + float(random.randint(1,100)) /20)
+
 	# html = get_html('http://www.netbian.com/mei/index.htm', encoding='gbk')
 	# soup = BeautifulSoup(html, 'html.parser')
 	# print(soup.select('title'), soup.select('title')[0].text)

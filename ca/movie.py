@@ -38,10 +38,9 @@ def save_to_txt(url, filepath=os.path.join(__dir__, f'../files/{str(round(time.t
         cmts = parse_ono_page(html)
     except Exception:
         raise SkipException('解析JSON异常') 
-    
     for item in cmts:
         # print(item)
-        with open(filepath,'a',encoding='utf-8') as f:
+        with open(filepath,'a', encoding='utf-8') as f:
             f.write(item['date'] + ',' + item['nickname'] + ',' + item['city'] + ',' +str(item['rate'])+','+item['comment']+'\n')
 
 # 获取的评论可能有重复，为了最终统计的真实性，需做去重处理
@@ -243,7 +242,7 @@ class ThreadCrawl(threading.Thread):
         
 if __name__ =='__main__':
     # print(get_movies('怒火·重案'))
-    movie_name = '我的青春有个你'
+    movie_name = '长津湖'
     scrawl_mv(movie_name)
 
     filepath = f'files/{movie_name}.txt'
