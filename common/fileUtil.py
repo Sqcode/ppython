@@ -33,5 +33,5 @@ if __name__ == '__main__':
 
     file_dir = r'C:\Users\dyjx\Desktop\ocr\kd'
     file_name(file_dir)
-    # list_name = listdir(filepath, [])
+    # list_name = listdir(file_dir, [])
     # print(list_name)

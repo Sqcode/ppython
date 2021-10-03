@@ -7,6 +7,8 @@ import numpy as np
 import matplotlib.pylab as plt
 __dir__ = os.path.dirname(os.path.abspath(__file__))
 # print(__dir__)
+from exp import MyException
+
 
 # 获取请求头
 def get_headers(localhost=True, refer="https://www.baidu.com", host=None):
@@ -120,7 +122,7 @@ class JarProjectPath:
         :param project_name:
         :return: 根路径
         """
-        PROJECT_NAME = 'AutoFrame' if project_name is None else project_name
+        PROJECT_NAME = 'py' if project_name is None else project_name
         project_path = os.path.abspath(os.path.dirname(__file__))
         root_path = project_path[:project_path.find("{}\\".format(PROJECT_NAME)) + len("{}\\".format(PROJECT_NAME))]
         # print('当前项目名称：{}\r\n当前项目根路径：{}'.format(PROJECT_NAME, root_path))
@@ -213,11 +215,20 @@ def plt_show(images, titles):
         plt.yticks([])
 
     plt.show()
+
+def file_exist(filepath):
+	if not os.path.exists(filepath):
+		raise MyException('文件不存在')
+	return True
+
 if __name__ == "__main__":
-	print("__main__")
-	send_email('1111', ['570300991'])
+	# print(JarProjectPath.project_root_path())
+	# print(file_exist(r'static/logo.png'))
+	# video_mask(r'static/dcf.mp4')
+	# video_to_gif(r'static/dcf.mp4')
+	# send_email('1111', ['570300991'])
 	# print(pinyin('怒火·重案'))
-	# print(__dir__)
+	print(__dir__)
 	# print(5 + float(random.randint(1,100)) /20)
 
 	# html = get_html('http://www.netbian.com/mei/index.htm', encoding='gbk')
