@@ -1,6 +1,6 @@
 from moviepy.editor import *
 from moviepy.video.VideoClip import TextClip
-from util import file_exist, JarProjectPath
+from util import file_exist, JarProjectPath, get_save_path
 # pip install moviepy -i https://pypi.tuna.tsinghua.edu.cn/simple
 from exp import MyException
 import time
@@ -11,12 +11,15 @@ def video_sub(file, start=0, end=1):
     if file_exist(file) and end > start:
         video = CompositeVideoClip([VideoFileClip(file).subclip(start, end)])
         # 写入剪辑完成的音乐
-        new_video = f"{os.path.splitext(file)[0]}_{str(round(time.time() * 1000))}.mp4"
+        new_video = get_save_path(origin_filepath=file)
         video.write_videofile(new_video)
         return new_video
 
 # 合并
 def video_compose(clips):
+    """
+    :param clips: 文件切片路径
+    """
     # final_clip = concatenate_videoclips([myclip2,myclip3], method='compose') #视频合并
     # clip1 = VideoFileClip("myvideo.mp4")
     # # 结合剪辑，你甚至能够完全自动化剪辑拼接视频的操作
@@ -32,7 +35,7 @@ def video_compose(clips):
         raise MyException('必须..至少2片段')
 
 # 视频转GIF
-def video_to_gif(file, subclip=False, start=0, end=1, resize=(488, 225), fps=15):
+def video_to_gif(file, subclip=False, start=0, end=1, resize=(488, 225), fps=30):
     """
     视频转GIF
     """
@@ -95,12 +98,12 @@ if __name__ == "__main__":
     
     # video_img_mask(r'static/dcf.mp4')
 
-    # video_sub(r'files/dcf.mp4', 3, 4)
+    # video_sub(r'files/doum.mp4', 1, 2)
 
-    # video_to_gif(r'files/dcf_1633238188930.mp4')
+    video_to_gif(r'files/compose_1633314036309.mp4')
 
     # video_img_mask(r'files/dcf_1633238188930.mp4')
 
-    # video_compose([r'files/dcf_1633238188930.mp4', r'files/dcf_1633238188930_1633238450194.mp4'])
+    # video_compose([r'files/doum_1.mp4', r'files/doum_1.mp4', r'files/doum_1.mp4', r'files/doum_1.mp4'])
     # files = [r'files/dcf_1633238188930.mp4', r'files/dcf_1633238188930_1633238450194.mp4']
     # print([VideoFileClip(c) for c in files])

@@ -1,4 +1,5 @@
 import os, time, requests, random, telnetlib, json, pypinyin, cv2
+from re import M
 from bs4 import BeautifulSoup
 from email.mime.text import MIMEText   # 定义邮件内容
 from email.header import Header # 定义邮件标题
@@ -8,7 +9,8 @@ import matplotlib.pylab as plt
 __dir__ = os.path.dirname(os.path.abspath(__file__))
 # print(__dir__)
 from exp import MyException
-
+import logging
+logging.basicConfig(filename = "out.txt",level=logging.DEBUG,format= "%(asctime)s %(levelname)s -- %(message)s",encoding='utf-8')
 
 # 获取请求头
 def get_headers(localhost=True, refer="https://www.baidu.com", host=None):
@@ -221,14 +223,50 @@ def file_exist(filepath):
 		raise MyException('文件不存在')
 	return True
 
+# 如果有提供原始路径，则最后文件保存至原路径目录下。若无，则项目根目录的files下。
+def get_save_path(filename=None, origin_filepath=None, suffix=None, file_prefix='', path=None):
+	"""
+	:param filename:	传入文件问，直接拼接项目根目录+文件名
+	:param origin_filepath:	原文件路径
+	:param suffix	即将要保存为的文件格式后缀
+	:param file_prefix:	保存的文件前缀
+	:param path:	文件保存的根路径
+	"""
+	# 是否传入 存储的根路径。默认项目根
+	if path is None:
+		path = f"{JarProjectPath.project_root_path()}/files"
+
+	# 是否直接指定文件名
+	if filename is not None:
+		file = f"{path}/{filename}"
+	else:
+		# 通过原始文件名，文件保存至该同级目录
+		if origin_filepath is not None:
+			path, file = os.path.split(origin_filepath)[:2]
+			# print(os.path.split(origin_filepath), path,'---------', file)
+			spx = file.split('.')
+			# print(spx)
+			# suffix = suffix if suffix else '.%s'%spx[1]
+			file = f"{path}/{spx[0]}_{str(round(time.time() * 1000))}{suffix if suffix else '.%s'%spx[1]}"
+		else:
+			# 没有原始文件名，则传入要保存的后缀
+			if suffix is None:
+				raise MyException('文件后缀不能为空，请传入要保存为的文件后缀格式suffix=（.***）')
+			file = f"{path}/{'%s'%file_prefix if file_prefix else ''}_{str(round(time.time() * 1000))}{suffix}"
+	
+	logging.info('文件保存至>%s'%file)
+	return file
+
 if __name__ == "__main__":
+	# print(__dir__)
+	path6 = 'C:/Users/dyjx/Desktop/py/images/1629353489174/sf_3.png'
+	print(get_save_path(suffix='.jpg', file_prefix='1111'))
 	# print(JarProjectPath.project_root_path())
 	# print(file_exist(r'static/logo.png'))
 	# video_mask(r'static/dcf.mp4')
 	# video_to_gif(r'static/dcf.mp4')
 	# send_email('1111', ['570300991'])
 	# print(pinyin('怒火·重案'))
-	print(__dir__)
 	# print(5 + float(random.randint(1,100)) /20)
 
 	# html = get_html('http://www.netbian.com/mei/index.htm', encoding='gbk')
