@@ -14,7 +14,6 @@ logging.basicConfig(filename = "out.txt",level=logging.DEBUG,format= "%(asctime)
 
 # 获取请求头
 def get_headers(localhost=True, refer="https://www.baidu.com", host=None):
-
 	ua = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36"
 	if not localhost:
 		uas = [
@@ -53,34 +52,41 @@ def get_html(url, ret_type="text", timeout=50, encoding="utf-8"):
 	elif ret_type == "json":
 		return res.json()
 
-# 创建图片文件夹
-def mkdir(path=os.path.join(__dir__, '../images/') + str(round(time.time() * 1000)) + '/'):
+# 创建文件夹
+def mkdir(path=os.path.join(__dir__, '../images/%s'%str(round(time.time() * 1000)) + '/')):
 	"""
 	新建图片文件夹
-	:param:path The file path - 文件路径 
+	:param path: The file path - 文件路径 
 	"""
-	folder = os.path.exists(path)
-	if not folder:                   #判断是否存在文件夹如果不存在则创建为文件夹
-		os.makedirs(path)            #makedirs 创建文件时如果路径不存在会创建这个路径
+	ext = os.path.exists(path)
+	#判断是否存在文件夹如果不存在则创建为文件夹
+	if not ext:
+		os.makedirs(path)
 		print ("---  new folder...  ---", path)
 	#else:
 		#print ("---  There is this folder!  ---")
-	return path
+	return '%s/'%path
 
 def download_img(src, filename=str(round(time.time() * 1000)), filedir=os.path.join(__dir__, '../images/'), domain=None):
 	"""
 	图片下载
-	:param:src The image http url - 图片链接
-	:param:filename file name - 名称。默认当前时间戳
-	:param:filedir file saved dir - 保存目录。默认当前文件，文件夹images
-	:param:domain website domain - 图片前缀域名
+	:param src: The image http url - 图片链接
+	:param filename: file name - 名称。默认当前时间戳
+	:param filedir: file saved dir - 保存目录。默认当前文件，文件夹images
+	:param domain: website domain - 图片前缀域名
 	"""
 	if domain is not None:
 		src = domain + src
 	pic = requests.get(src, timeout=20)
+	# 去掉链接后面的参数
+	src = src.split('?')[0]
+
+	filepath = filedir + filename + src[-4:]
 	if pic.status_code == 200:
-		with open(filedir + filename + src[-4:], 'wb') as f:
+		with open(filepath, 'wb') as f:
 			f.write(pic.content)
+
+	return filepath
 
 # 代理检测函数
 def check_ip_port(ip_port):
@@ -258,9 +264,13 @@ def get_save_path(filename=None, origin_filepath=None, suffix=None, file_prefix=
 	return file
 
 if __name__ == "__main__":
-	# print(__dir__)
 	path6 = 'C:/Users/dyjx/Desktop/py/images/1629353489174/sf_3.png'
-	print(get_save_path(suffix='.jpg', file_prefix='1111'))
+	# print(get_save_path(suffix='.jpg', file_prefix='1111'))
+	url = 'https://img-blog.csdnimg.cn/20211003092556847.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5oiR5pivc3ByaW5nbWVuZw==,size_13,color_FFFFFF,t_70,g_se,x_16'
+	download_img(url, str(1), r'c:\Users\dyjx\Desktop\py\111')
+
+
+	# print(url.split('?')[0])
 	# print(JarProjectPath.project_root_path())
 	# print(file_exist(r'static/logo.png'))
 	# video_mask(r'static/dcf.mp4')
@@ -288,6 +298,6 @@ if __name__ == "__main__":
 	#check_proxy([{'ip': '222.74.202.231', 'port': '8080'}])
 	# 222.74.202.231:8080
 	# get_html('http://www.netbian.com/mei/index.htm', encoding='gbk')
-	#mkdir(")
+	# mkdir()
 	#str = 'url("https://cn.bing.com/th?id=OHR.Heliodoxa_ZH-CN9872355419_1920x1080.jpg&rf=LaDigue_1920x1080.jpg&pid=hp")'
 	#print (str[5:-2], str[-4:])

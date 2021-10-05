@@ -59,7 +59,6 @@ def listdir(path, list_name):
 # os.path.join(path1[,path2[,…]]) # 将多个路径组合后返回
 # os.path.getatime(path) # 返回path所指向的文件或目录的最后存取时间
 # os.path.getmtime(path) # 返回path所指向的文件或目录的最后修改时间
-
 if __name__ == '__main__':
 
     file_dir = r'C:\Users\dyjx\Desktop\ocr\kd'
