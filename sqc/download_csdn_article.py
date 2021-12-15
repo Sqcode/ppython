@@ -50,7 +50,7 @@ def download_article(url):
 
 if __name__ == '__main__':
     # 博客地址url，问号后的参数可以都删掉
-    url = 'https://blog.csdn.net/qq_39454665/article/details/120507437'
+    url = 'https://blog.csdn.net/jasonsong2008/article/details/87801529'
     download_article(url)
 
     # text = '11<a id="1903__10__4__John_Vincent_Atanasoff__24"></a>'

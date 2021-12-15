@@ -1,14 +1,9 @@
-import sys, os
-__dir__ = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(__dir__)
-sys.path.append(os.path.abspath(os.path.join(__dir__, '../')))
-# print(__dir__, sys.path)
-from util import get_html, check_ip_port, check_proxy
+from module_path import util, logging
 from lxml import etree
 
 def ip66():
     url = "http://www.66ip.cn/1.html"
-    text = get_html(url)
+    text = util.get_html(url)
     ip_xpath = '//table/tr[position()>1]/td[1]/text()'
     port_xpath = '//table/tr[position()>1]/td[2]/text()'
     ret = format_html(text, ip_xpath, port_xpath)
@@ -16,7 +11,7 @@ def ip66():
 
 def ip3366():
     url = "https://proxy.ip3366.net/free/?action=china&page=1"
-    text = get_html(url)
+    text = util.get_html(url)
     ip_xpath = '//td[@data-title="IP"]/text()'
     port_xpath = '//td[@data-title="PORT"]/text()'
     ret = format_html(text, ip_xpath, port_xpath)
@@ -24,7 +19,7 @@ def ip3366():
 
 def ip_huan():
     url = "https://ip.ihuan.me/?page=b97827cc"
-    text = get_html(url)
+    text = util.get_html(url)
     ip_xpath = '//tbody/tr/td[1]/a/text()'
     port_xpath = '//tbody/tr/td[2]/text()'
     ret = format_html(text, ip_xpath, port_xpath)
@@ -32,7 +27,7 @@ def ip_huan():
 
 def ip_kuai():
     url = "https://www.kuaidaili.com/free/inha/2/"
-    text = get_html(url)
+    text = util.get_html(url)
     ip_xpath = '//td[@data-title="IP"]/text()'
     port_xpath = '//td[@data-title="PORT"]/text()'
     ret = format_html(text, ip_xpath, port_xpath)
@@ -40,7 +35,7 @@ def ip_kuai():
 
 def ip_jiangxi():
     url = "https://ip.jiangxianli.com/?page=1"
-    text = get_html(url)
+    text = util.get_html(url)
     ip_xpath = '//tbody/tr[position()!=7]/td[1]/text()'
     port_xpath = '//tbody/tr[position()!=7]/td[2]/text()'
     ret = format_html(text, ip_xpath, port_xpath)
@@ -48,7 +43,7 @@ def ip_jiangxi():
 
 def ip_kaixin():
     url = "http://www.kxdaili.com/dailiip/1/1.html"
-    text = get_html(url)
+    text = util.get_html(url)
     ip_xpath = '//tbody/tr/td[1]/text()'
     port_xpath = '//tbody/tr/td[2]/text()'
     ret = format_html(text, ip_xpath, port_xpath)
@@ -56,7 +51,7 @@ def ip_kaixin():
 
 def ip_nima():
     url = "http://www.nimadaili.com/putong/1/"
-    text = get_html(url)
+    text = util.get_html(url)
     ip_xpath = '//tbody/tr/td[1]/text()'
     ret = format_html_ext(text, ip_xpath)
     print(ret)
@@ -81,7 +76,7 @@ def format_html_ext(text, ip_xpath):
 # 代理IP网站源码获取部分
 def ip89():
     url = "https://www.89ip.cn/index_1.html"
-    text = get_html(url)
+    text = util.get_html(url)
     ip_xpath = '//tbody/tr/td[1]/text()'
     port_xpath = '//tbody/tr/td[2]/text()'
     ret = format_html(text, ip_xpath, port_xpath)
@@ -109,9 +104,9 @@ def format_html(text, ip_xpath, port_xpath):
 if __name__ == '__main__':
 
     print(1)
-    # ip_port = ip89()
-    # print(ip_port)
-    # check_proxy(ip_port)
+    ip_port = ip89()
+    print(ip_port)
+    util.check_proxy(ip_port)
 
     # n = int(input())
     #     # print(n)

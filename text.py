@@ -1,7 +1,4 @@
-# import util
-
-from module_path import util, logging
-
+from common import util, logging
 
 if __name__ == '__main__':
     # print(1)
