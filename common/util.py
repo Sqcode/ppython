@@ -13,8 +13,8 @@ import logging
 logging.basicConfig(filename = "out.txt",level=logging.DEBUG,format= "%(asctime)s %(levelname)s -- %(message)s",encoding='utf-8')
 
 # 获取请求头
-def get_headers(localhost=True, refer="https://www.baidu.com", host=None):
-	ua = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36"
+def get_headers(localhost=True, refer="https://www.baidu.com", host=None, cookie=None):
+	ua = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36"
 	if not localhost:
 		uas = [
 			"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36",
@@ -34,13 +34,14 @@ def get_headers(localhost=True, refer="https://www.baidu.com", host=None):
 	headers = {
 		"User-Agent": ua,
 		"Referer": refer,
-		"Host": host
+		"Host": host,
+		"cookie": cookie
 	}
 	return headers
 
 # 获取html
-def get_html(url, ret_type="text", timeout=50, encoding="utf-8"):
-	headers = get_headers()
+def get_html(url, ret_type="text", timeout=50, encoding="utf-8", cookie=None):
+	headers = get_headers(cookie=cookie)
 	res = requests.get(url, headers=headers, timeout=timeout)
 	res.encoding = encoding
 	# print(res.status_code)

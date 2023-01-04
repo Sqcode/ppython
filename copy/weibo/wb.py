@@ -1,8 +1,9 @@
 import sys, os
 __dir__ = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(__dir__)
-sys.path.append(os.path.abspath(os.path.join(__dir__, '../common')))
-import util
+sys.path.append(os.path.abspath(os.path.join(__dir__, '../')))
+from module_path import util, logging
+
 import requests
 from bs4 import BeautifulSoup
 from email.mime.text import MIMEText   # 定义邮件内容
@@ -20,14 +21,9 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 4：APScheduler框架更加强大，可以直接在里面添加定点与定时任务；
 """
 def get_html():
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36'",
-        "Referer": "https://www.baidu.com"
-    }
     
-    res = requests.get("https://s.weibo.com/top/summary?cate=realtimehot", headers=util.get_headers(localhost=False))
-    print(res.text)
-    # return analysis_html(res.text)
+    res = util.get_html("https://s.weibo.com/top/summary?cate=realtimehot", cookie="SUBP=0033WrSXqPxfM72-Ws9jqgMF55529P9D9Wh7l3n.MyzGHmHV2EiIozJx; SUB=_2AkMU9wEHf8NxqwJRmPEdz2rqZYt3wwDEieKiq_DcJRMxHRl-yj9kqkMOtRB6P3cv6Ez-kqkRQzGXif2juildv7sWNAMk; SINAGLOBAL=590425989896.2971.1672187444919; _s_tentry=-; Apache=2684199289101.9893.1672812941329; ULV=1672812941440:2:1:1:2684199289101.9893.1672812941329:1672187444925")
+    return analysis_html(res)
 
 def analysis_html(html):
     soup = BeautifulSoup(html, 'lxml')
