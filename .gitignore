@@ -1,0 +1,28 @@
+.DS_Store
+/dist
+dist.tar
+
+/images
+/files
+/国外疫情数据
+__pycache__
+
+# local env files
+.env.local
+.env.*.local
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+out.txt
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
