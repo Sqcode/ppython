@@ -1,7 +1,7 @@
-.DS_Store
+﻿.DS_Store
 /dist
 dist.tar
-
+/build
 /images
 /files
 /国外疫情数据
