@@ -1,4 +1,4 @@
-import os, time, requests, random, telnetlib, json, pypinyin, cv2
+import os, time, requests, random, telnetlib, json, pypinyin, cv2, traceback
 from re import M
 from bs4 import BeautifulSoup
 from email.mime.text import MIMEText   # 定义邮件内容
@@ -163,7 +163,7 @@ def yinjie(word):
     return s
 
 # 发送邮件，QQ
-def send_email(data, receivers, server='@qq.com', sender='627758338'):
+def send_email(title, data, receivers, server='@qq.com', sender='627758338'):
 	"""
 	:param :data 要发送的内容
 	:param :receivers 接受人数组
@@ -184,7 +184,7 @@ def send_email(data, receivers, server='@qq.com', sender='627758338'):
 		to_addrs.append(receiver)
 
 	# 邮件的标题
-	subject = f"{rq} 微博热搜"
+	subject = f"{rq} - {title}"
 	# 发送内容
 	if data:
 		msg = MIMEText(data, 'html', 'utf-8') # 邮件的正文
@@ -199,9 +199,16 @@ def send_email(data, receivers, server='@qq.com', sender='627758338'):
 		smtp.login(from_addr, password)# 登录邮箱服务器，输入自己的账号和密码
 
 		print("发送中...")
-		smtp.sendmail(from_addr, to_addrs, msg.as_string())# 邮件发送多人
-		# smtp.sendmail(from_addr, to_addr, msg.as_string())# 发送给个人的邮件
-		smtp.quit()
+		try:
+			smtp.sendmail(from_addr, to_addrs, msg.as_string())# 邮件发送多人
+			# smtp.sendmail(from_addr, to_addr, msg.as_string())# 发送给个人的邮件
+		except BaseException as e:
+			print ('repr(e):\t')
+			#以下两步都是输出错误的具体位置的
+			traceback.print_exc()
+			print ('traceback.format_exc():\n%s' % traceback.format_exc())
+		finally: 
+			smtp.quit()
 		print("发送完毕")
 	else:
 		print('未获取到内容')

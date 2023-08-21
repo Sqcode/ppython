@@ -34,8 +34,8 @@ def dowmloadPic(html, keyword):
                     f.write(pic.content)
 
                 i += 1
-                # if i == 11:
-                #     break
+                if i == 11:
+                    break
 if __name__ == '__main__':
     word = input("Input key word: ")
     url = 'http://image.baidu.com/search/flip?tn=baiduimage&ie=utf-8&word=' + word + '&ct=201326592&v=flip'

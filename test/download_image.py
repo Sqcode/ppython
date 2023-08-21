@@ -106,6 +106,8 @@ def dowmloadPic(html, keyword):
                     print(e)
                     continue
             i += 1
+            if i == 11:
+                break
         
 
 if __name__ == '__main__':

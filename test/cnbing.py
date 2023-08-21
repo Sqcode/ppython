@@ -49,7 +49,6 @@ try:
     wd.until(EC.visibility_of_element_located(locator))
     # a = WebDriverWait(driver, 20, 1).until(EC.visibility_of_element_located(locator))
     #print ("WebDriverWait", a)
-    
 
     filedir = mkdir(desktop_path + '/' + str(round(time.time() * 1000)))
     for i in range(8):

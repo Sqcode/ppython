@@ -7,12 +7,20 @@ import requests
 from bs4 import BeautifulSoup
 from email.mime.text import MIMEText   # 定义邮件内容
 from email.header import Header # 定义邮件标题
+import smtplib
+from email.mime.multipart import MIMEMultipart
+
 import time
 import datetime
-import smtplib
 from threading import Timer
 import sys
 from apscheduler.schedulers.blocking import BlockingScheduler
+from selenium import webdriver
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.action_chains import ActionChains
+import traceback
 """
 1：循环+sleep方式适合简答测试，
 2：timer可以实现定时任务，但是对定点任务来说，需要检查当前时间点；
@@ -33,6 +41,7 @@ def analysis_html(html):
     soup = BeautifulSoup(html, 'lxml')
     data = soup.find(name="tbody")
     send_msgs = []
+    print(data)
     if data:
         items = data.find_all(name='tr')  # 过滤到全部数据
         for item in items:
@@ -58,6 +67,37 @@ def analysis_html(html):
         # print(send_msgs)
     return send_msgs
 
+def selenium_get_html():
+    url = "https://s.weibo.com/top/summary?cate=realtimehot"
+    option = webdriver.ChromeOptions()
+    # 不打开窗口 ， 静默模式
+    # option.add_argument('--headless')
+    option.headless = True
+
+    # 防止打印一些无用的日志
+    option.add_experimental_option("excludeSwitches", ['enable-automation', 'enable-logging'])
+    driver = webdriver.Chrome(chrome_options=option)
+    #driver.set_window_size(200,200)
+    driver.get(url)
+    driver.implicitly_wait(3) # 智能等待3秒
+
+    locator = (By.CLASS_NAME, 'wbs-hotrank')
+
+    try:
+        # The presence_of_element_located condition is fulfilled when the element is just created, still not fully rendered. Accessing element in this early phase often causes to ElementNotInteractableException as you facing.
+        wd = WebDriverWait(driver, 20, 0.5)
+        wd.until(EC.visibility_of_element_located(locator))
+
+        return analysis_html(driver.page_source)
+
+    except BaseException as e:
+        print ('repr(e):\t')
+        #以下两步都是输出错误的具体位置的
+        traceback.print_exc()
+        print ('traceback.format_exc():\n%s' % traceback.format_exc())
+    finally: 
+        driver.quit()
+
 def wb_send_email_param(server, sender, receivers):
     rq = time.strftime("%Y-%m-%d %H:%M:%S") # 发送时间
     from_addr = sender + server # 发送的邮箱
@@ -76,7 +116,9 @@ def wb_send_email_param(server, sender, receivers):
     # 邮件的标题
     subject = f"{rq} 微博热搜"
     # 邮件html内容，需要把热搜的爬取到的数据进行格式化
-    data = get_html()
+    # data = get_html()
+    data = selenium_get_html()
+
     if data:
         print("获取内容...", len(data))
         table = "<table>"
@@ -95,30 +137,18 @@ def wb_send_email_param(server, sender, receivers):
         table += "</table>"
         # print(table)
         content = table
-        msg = MIMEText(content, 'html', 'utf-8') # 邮件的正文
-        msg['Subject'] = Header(subject, 'utf-8') # 邮件的标题
-        msg['From'] = from_addr # 邮件发送方
-        # msg['To'] = to_addr # 邮件接收方，发送给一人
-        msg['To']=','.join(to_addrs)# 邮件接收方，发送给多人
 
-        smtp = smtplib.SMTP_SSL(smtpserver, 465)# SSL协议端口号要使用465
-        smtp.helo(smtpserver) # helo向邮箱标识用户身份
-        smtp.ehlo(smtpserver) # 服务器返回结果确认
-        smtp.login(from_addr, password)# 登录邮箱服务器，输入自己的账号和密码
-
-        print("发送中...")
-        smtp.sendmail(from_addr, to_addrs, msg.as_string())# 邮件发送多人
-        # smtp.sendmail(from_addr, to_addr, msg.as_string())# 发送给个人的邮件
-        smtp.quit()
-        print("发送完毕")
+        util.send_email(subject, content, receivers)
     else:
         print('未获取到内容')
+
+
 
 def wb_send_email():
     server = '@qq.com'
     sender = '627758338'
     # , '367269243'
-    receivers = ['570300991', '367269243']
+    receivers = ['570300991']
 
     rq = time.strftime("%Y-%m-%d %H:%M:%S") # 发送时间
     from_addr = sender + server # 发送的邮箱
@@ -209,10 +239,11 @@ def doScheduler(func, seconds, times):
 
 
 if __name__ == '__main__':
-
+    # selenium_get_html()
     # get_html() #'2770404149',
     # wb_send_email()
     #, '1070197073',  '1297932368','367269243', '445418932'
+    # wb_send_email_param('@qq.com', '627758338', ['570300991', '367269243'])
     wb_send_email_param('@qq.com', '627758338', ['570300991'])
     # doScheduler(wb_send_email, 60, 2)
 

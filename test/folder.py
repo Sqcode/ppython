@@ -29,10 +29,10 @@ def listdir(path, list_name):
 
     return list_name
 
-if __name__ == '__main__':
+# if __name__ == '__main__':
 
-    file_dir = r'C:\Users\dyjx\Desktop\ocr\kd'
-    file_name(file_dir)
+#     file_dir = r'C:\Users\dyjx\Desktop\ocr\kd'
+#     file_name(file_dir)
     # list_name = listdir(filepath, [])
     # print(list_name)
 

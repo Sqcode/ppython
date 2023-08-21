@@ -225,7 +225,7 @@ if __name__ == '__main__':
 
         # print(html)
         books = get_books(html, books)
-
+        time.sleep(3) # 3秒
     # 保存csv，保存后如若用excel打开，则需先用记事本打开，另存为 ANSI ， 才不会乱码
     #wrt(books)
 
