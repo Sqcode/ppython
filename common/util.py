@@ -12,6 +12,10 @@ from exp import MyException
 import logging
 logging.basicConfig(filename = "out.txt",level=logging.DEBUG,format= "%(asctime)s %(levelname)s -- %(message)s",encoding='utf-8')
 
+def get_desktop():
+    desktop_path = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
+    return desktop_path
+
 # 获取请求头
 def get_headers(localhost=True, refer="https://www.baidu.com", host=None):
 	ua = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36"
