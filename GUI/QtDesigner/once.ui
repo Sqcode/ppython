@@ -14,6 +14,9 @@
    <string>演示窗口</string>
   </property>
   <widget class="QTabWidget" name="tabWidget">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="geometry">
     <rect>
      <x>0</x>
@@ -29,14 +32,25 @@
     <attribute name="title">
      <string>页签1</string>
     </attribute>
-    <widget class="QComboBox" name="comboBox">
+    <widget class="QComboBox" name="unit_comboBox">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
      <property name="geometry">
       <rect>
-       <x>130</x>
+       <x>160</x>
        <y>20</y>
        <width>141</width>
        <height>22</height>
       </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>微软雅黑</family>
+       <pointsize>12</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
      </property>
      <property name="editable">
       <bool>true</bool>
@@ -50,21 +64,6 @@
      <property name="placeholderText">
       <string>请选择</string>
      </property>
-     <item>
-      <property name="text">
-       <string>新建项目1</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>新建项目2</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>新建项目3</string>
-      </property>
-     </item>
     </widget>
     <widget class="QPushButton" name="btn">
      <property name="geometry">
@@ -92,11 +91,6 @@
       <string>alert</string>
      </property>
     </widget>
-   </widget>
-   <widget class="QWidget" name="tab_2">
-    <attribute name="title">
-     <string>Tab 2</string>
-    </attribute>
    </widget>
   </widget>
  </widget>
