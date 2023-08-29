@@ -9,3 +9,6 @@ if __name__ == '__main__':
     desktop_path = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
     print(desktop_path)
     util.mkdir(desktop_path + '/' + str(round(time.time() * 1000)))
+
+    print('{:^10d}'.format(3567))
+    print(f"{0:%>10}")

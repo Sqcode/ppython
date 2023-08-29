@@ -97,7 +97,7 @@ try:
         wd.until(EC.visibility_of_element_located((By.ID, "leftNav")))
 
         sh_igl = driver.find_element_by_id('leftNav') #上一页
-        ActionChains(driver).click(sh_igl).perform()
+        # ActionChains(driver).click(sh_igl).perform()
 
         # 第一次等待久一点
         if i == 0:
