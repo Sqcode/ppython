@@ -10,6 +10,7 @@ __pycache__
 # local env files
 .env.local
 .env.*.local
+*.ini
 
 # Log files
 npm-debug.log*
@@ -17,6 +18,8 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 out.txt
+log.txt
+*.log
 
 # Editor directories and files
 .idea
