@@ -2,8 +2,8 @@ import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QMessageBox
 
 class PopupWindow(QMessageBox):
-    def __init__(self, icon_type, title, message):
-        super().__init__()
+    def __init__(self, window, icon_type, title, message):
+        super().__init__(window)
         self.setWindowTitle(title)
         self.setText(message)
 

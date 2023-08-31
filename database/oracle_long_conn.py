@@ -3,7 +3,9 @@ from cx_Oracle import Connection, Cursor
 from typing import List, Tuple, Any
 import configparser
 
-import sys, os
+import sys, os, logging
+logging.basicConfig(filename="log.log", level=logging.INFO, format="%(asctime)s [%(levelname)s] (%(module)s:%(lineno)d) - %(message)s")
+
 # __dir__ = os.path.dirname(os.path.abspath(__file__))
 # sys.path.append(__dir__)
 # sys.path.append(os.path.abspath(os.path.join(__dir__, '../database')))
@@ -24,39 +26,88 @@ class OracleDatabase:
         dsn = cx_Oracle.makedsn(self.host, self.port, service_name=self.service_name)
         self.connection_pool = cx_Oracle.SessionPool(user=self.username, password=self.password, dsn=dsn, min=self.min_connections, max=self.max_connections)
     
-    def execute_query(self, query: str, params: Tuple = None) -> List[Tuple]:
+    def execute_query(self, sql: str, params: Tuple = None) -> List[Tuple]:
         connection: Connection = self.connection_pool.acquire()
         cursor: Cursor = connection.cursor()
         
         try:
             if params:
-                cursor.execute(query, params)
+                cursor.execute(sql, params)
             else:
-                cursor.execute(query)
+                cursor.execute(sql)
             
             result: List[Tuple] = cursor.fetchall()
+            # print(f" Query: {sql}, Param: {params}, Result: {result}")
+            logging.info(f" Query: {sql}, Param: {params}, Result: {result}")
+
             return result
+        except Exception as e:
+            # 捕获异常并重新抛出
+            logging.error(f"Error sql: {sql}, Param: {params}")
+            raise e
         
         finally:
             cursor.close()
             self.connection_pool.release(connection)
     
+    def execute_update(self, sql, params=None):
+        try:
+            if params:
+                self.cursor.execute(sql, params)
+            else:
+                self.cursor.execute(sql)
+            self.connection.commit()
+        except cx_Oracle.DatabaseError as e:
+            self.connection.rollback()
+            logging.error(f"Error sql: {sql}, Param: {params}")
+            raise e
+        
+    def execute_transaction(self, queries: list):
+        try:
+            connection = self.connection_pool.acquire()  # 获取连接
+            connection.begin()  # 开始事务
+
+            cursor = connection.cursor()
+            for sql in queries:
+                cursor.execute(sql)
+                logging.info(f" SQL: {sql}")
+
+            connection.commit()  # 提交事务
+
+        except Exception as e:
+            connection.rollback()  # 回滚事务
+            logging.error(f"Error queries: {queries}")
+            raise e
+        finally:
+            self.connection_pool.release(connection)  # 释放连接
+
     def select(self, table, columns=None, where_column=None, where_value=None):
-        query = f"SELECT {', '.join(columns) if columns else '*'} FROM {table}"
+        sql = f"SELECT {', '.join(columns) if columns else '*'} FROM {table}"
         if where_column and where_value:
-            query += f" WHERE {where_column}=:where_val"
-            return self.execute_query(query, {'where_val': where_value})
+            sql += f" WHERE {where_column}=:where_val"
+            return self.execute_query(sql, {'where_val': where_value})
         else:
-            return self.execute_query(query)
+            return self.execute_query(sql)
     
     def select_with_conditions(self, table, columns=None, conditions=None):
-            query = f"SELECT {', '.join(columns) if columns else '*'} FROM {table}"
+            sql = f"SELECT {', '.join(columns) if columns else '*'} FROM {table}"
 
             if conditions:
                 where_clause = " AND ".join([f"{col} = :{col}" for col in conditions])
-                query += f" WHERE {where_clause}"
-            return self.execute_query(query, conditions)
+                sql += f" WHERE {where_clause}"
+            return self.execute_query(sql, conditions)
     # ... 其他方法 ...
+
+    def update(self, sql):
+        if sql is not None:
+            self.execute_update(sql)
+
+    def update(self, table, set_columns, set_values, where_column, where_value):
+        sql = f"UPDATE {table} SET {', '.join([col+'=:'+col for col in set_columns])} WHERE {where_column}=:where_val"
+        params = dict(zip(set_columns, set_values))
+        params['where_val'] = where_value
+        self.execute_update(sql, params)
+
     def close(self):
         self.connection_pool.close()
 
@@ -66,6 +117,7 @@ def conn():
     # 构建配置文件路径
     # return os.path.join(script_directory, '..', 'database', 'kd_config.ini')
     return os.path.join(script_directory, './kd_config.ini')
+    # return os.path.join(script_directory, './database/kd_config.ini')
 
 # if __name__ == '__main__':
     # db = OracleDatabase(conn())
@@ -75,17 +127,17 @@ def conn():
     #     # result = db.select("KINGDEE00.T_BD_UNIT_L", ["FUNITID", "FNAME", "FDESCRIPTION"], "FNAME", '米')
     #     # print(result)
 
-    #     # query = "SELECT a as b FROM tablename WHERE column_name = :value"
+    #     # sql = "SELECT a as b FROM tablename WHERE column_name = :value"
     #     # params = {"value": "some_value"}
 
-    #     # query = '''
+    #     # sql = '''
     #     # SELECT TBU.FUNITID, TBU.FNUMBER, TBUL.FNAME 
     #     # FROM KINGDEE00.T_BD_UNIT TBU LEFT JOIN KINGDEE00.T_BD_UNIT_L TBUL ON TBUL.FUNITID = TBU.FUNITID 
     #     # WHERE TBU.FFORBIDSTATUS = 'A' AND TBU.FDOCUMENTSTATUS = 'C' AND TBUL.FNAME IN ('Pcs', '条', '件') 
     #     # '''
     #     # params = {}
 
-    #     # query = '''
+    #     # sql = '''
     #     # SELECT TBU.FUNITID, TBU.FNUMBER, TBUL.FNAME 
     #     # FROM KINGDEE00.T_BD_UNIT TBU LEFT JOIN KINGDEE00.T_BD_UNIT_L TBUL ON TBUL.FUNITID = TBU.FUNITID 
     #     # WHERE TBU.FFORBIDSTATUS = 'A' AND TBU.FDOCUMENTSTATUS = 'C' AND TBUL.FNAME= :FNAME
@@ -96,13 +148,13 @@ def conn():
 
     #     # 构建 IN 条件字符串
     #     in_units = ', '.join(':' + str(i + 1) for i in range(len(units)))
-    #     query = f'''
+    #     sql = f'''
     #     SELECT TBU.FUNITID, TBU.FNUMBER, TBUL.FNAME 
     #     FROM KINGDEE00.T_BD_UNIT TBU LEFT JOIN KINGDEE00.T_BD_UNIT_L TBUL ON TBUL.FUNITID = TBU.FUNITID 
     #     WHERE TBU.FFORBIDSTATUS = 'A' AND TBU.FDOCUMENTSTATUS = 'C' AND TBUL.FNAME IN ({in_units})
     #     '''
-    #     result = db.execute_query(query, units)
-    #     print(query, result)
+    #     result = db.execute_query(sql, units)
+    #     print(sql, result)
     
     # except cx_Oracle.DatabaseError as e:
     #     print("Error:", e)
