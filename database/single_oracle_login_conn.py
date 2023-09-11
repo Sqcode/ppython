@@ -9,9 +9,17 @@ logging.basicConfig(filename="log.log", level=logging.INFO, format="%(asctime)s 
 # __dir__ = os.path.dirname(os.path.abspath(__file__))
 # sys.path.append(__dir__)
 # sys.path.append(os.path.abspath(os.path.join(__dir__, '../database')))
-
+from threading import Lock
 class OracleDatabase:
+    _instance = None
+    _lock = Lock()
 
+    def __new__(cls, config_path: str):
+        with cls._lock:
+            if cls._instance is None:
+                cls._instance = super(OracleDatabase, cls).__new__(cls)
+                cls._instance.__init__(config_path)
+        return cls._instance
     def __init__(self, config_path: str):
         self.config = configparser.ConfigParser()
         self.config.read(config_path)
@@ -145,6 +153,16 @@ def close(connectionPool):
         logging.error(f'Error closing database connections')
 
 # if __name__ == '__main__':
+#     # 第一次调用，创建了实例并初始化连接池
+#     db_instance1 = get_connection()
+
+#     # 后续的调用将返回同一个实例，不会重新创建
+#     db_instance2 = get_connection()
+
+#     # db_instance1 和 db_instance2 引用同一个实例
+#     print(db_instance1 is db_instance2)  # 输出 True
+
+
     # db = OracleDatabase(conn())
 
     # try:

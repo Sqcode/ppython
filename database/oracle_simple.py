@@ -61,17 +61,17 @@ class OracleDatabase:
         self.cursor.close()
         self.connection.close()
 
-if __name__ == '__main__':
-    db = OracleDatabase("system", "root_R00t", "192.168.100.26", "1521", "ORCL")
-   # db = OracleDatabase("username", "password", "host", "port", "server_name")
+# if __name__ == '__main__':
+#     db = OracleDatabase("system", "root_R00t", "192.168.100.26", "1521", "ORCL")
+#    # db = OracleDatabase("username", "password", "host", "port", "server_name")
     
-    try:
-        # 查询数据
-        result = db.select("KINGDEE00.T_BD_UNIT_L", ["FUNITID", "FNAME", "FDESCRIPTION"], "FNAME", '米')
-        print(result)
+#     try:
+#         # 查询数据
+#         result = db.select("KINGDEE00.T_BD_UNIT_L", ["FUNITID", "FNAME", "FDESCRIPTION"], "FNAME", '米')
+#         print(result)
 
-    except cx_Oracle.DatabaseError as e:
-        print("Error:", e)
+#     except cx_Oracle.DatabaseError as e:
+#         print("Error:", e)
 
 
     # try:
@@ -98,4 +98,4 @@ if __name__ == '__main__':
     #     print("Error:", e)
     #     db.connection.rollback()
 
-    db.close()
+    # db.close()

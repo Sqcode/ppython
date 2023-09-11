@@ -2,7 +2,7 @@ import cx_Oracle
 from cx_Oracle import Connection, Cursor
 from typing import List, Tuple, Any
 import configparser
-
+from threading import Lock
 import sys, os, logging
 logging.basicConfig(filename="log.log", level=logging.INFO, format="%(asctime)s [%(levelname)s] (%(module)s:%(lineno)d) - %(message)s")
 
@@ -11,6 +11,15 @@ logging.basicConfig(filename="log.log", level=logging.INFO, format="%(asctime)s 
 # sys.path.append(os.path.abspath(os.path.join(__dir__, '../database')))
 
 class OracleDatabase:
+    _instance = None
+    _lock = Lock()
+
+    def __new__(cls, config_path: str):
+        with cls._lock:
+            if cls._instance is None:
+                cls._instance = super(OracleDatabase, cls).__new__(cls)
+                cls._instance.__init__(config_path)
+        return cls._instance
     def __init__(self, config_path: str):
         self.config = configparser.ConfigParser()
         self.config.read(config_path)
@@ -25,7 +34,7 @@ class OracleDatabase:
         
         dsn = cx_Oracle.makedsn(self.host, self.port, service_name=self.service_name)
         self.connection_pool = cx_Oracle.SessionPool(user=self.username, password=self.password, dsn=dsn, min=self.min_connections, max=self.max_connections)
-    
+
     def execute_query(self, sql: str, params: Tuple = None) -> List[Tuple]:
         connection: Connection = self.connection_pool.acquire()
         cursor: Cursor = connection.cursor()
@@ -38,7 +47,7 @@ class OracleDatabase:
             
             result: List[Tuple] = cursor.fetchall()
             # print(f" Query: {sql}, Param: {params}, Result: {result}")
-            logging.info(f" Query: {sql}, Param: {params}, Result: {result}")
+            logging.info(f"Query: {sql}, Param: {params}, Result: {result}")
 
             return result
         except Exception as e:
@@ -52,15 +61,26 @@ class OracleDatabase:
     
     def execute_update(self, sql, params=None):
         try:
+            connection = self.connection_pool.acquire()  # 获取连接
+            connection.begin()  # 开始事务
+
+            cursor = connection.cursor()
             if params:
-                self.cursor.execute(sql, params)
+                cursor.execute(sql, params)
             else:
-                self.cursor.execute(sql)
-            self.connection.commit()
-        except cx_Oracle.DatabaseError as e:
-            self.connection.rollback()
+                cursor.execute(sql)
+
+            connection.commit()
+            rowcount = cursor.rowcount
+            logging.info(f"Update: {sql}, Param: {params}, Result: {rowcount}")
+            
+            return rowcount
+        except Exception as e:
+            connection.rollback()  # 回滚事务
             logging.error(f"Error sql: {sql}, Param: {params}")
             raise e
+        finally:
+            self.connection_pool.release(connection)  # 释放连接
         
     def execute_transaction(self, queries: list):
         try:
@@ -111,14 +131,37 @@ class OracleDatabase:
     def close(self):
         self.connection_pool.close()
 
-def conn():
+def get_connection():
+    return OracleDatabase(config())
+
+def config():
     # 获取当前脚本所在目录
     script_directory = os.path.dirname(os.path.abspath(__file__))
     # 构建配置文件路径
     # return os.path.join(script_directory, '..', 'database', 'kd_config.ini')
     return os.path.join(script_directory, './kd_config.ini')
+    # return os.path.join(script_directory, './database/kd_config.ini')
+
+def close(connectionPool):
+    try:
+        # 关闭数据库连接的操作
+        if connectionPool is not None:
+            connectionPool.close()
+            logging.info(f" 关闭连接: {connectionPool}")
+
+    except Exception as e:
+        logging.error(f'Error closing database connections')
 
 # if __name__ == '__main__':
+#     # 第一次调用，创建了实例并初始化连接池
+#     db_instance1 = get_connection()
+
+#     # 后续的调用将返回同一个实例，不会重新创建
+#     db_instance2 = get_connection()
+
+#     # db_instance1 和 db_instance2 引用同一个实例
+#     print(db_instance1 is db_instance2)  # 输出 True
+
     # db = OracleDatabase(conn())
 
     # try:
