@@ -222,6 +222,9 @@
          <property name="enabled">
           <bool>true</bool>
          </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
          <property name="placeholderText">
           <string>单据中的分码</string>
          </property>
@@ -230,6 +233,9 @@
        <item>
         <widget class="QTextEdit" name="reserveAuxCSText">
          <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="readOnly">
           <bool>true</bool>
          </property>
          <property name="placeholderText">
@@ -258,6 +264,9 @@
        <item>
         <widget class="QTextEdit" name="newAuxCSText">
          <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="readOnly">
           <bool>true</bool>
          </property>
          <property name="placeholderText">

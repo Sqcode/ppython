@@ -59,56 +59,41 @@ def reset_spec(AuxCs, AuxCS, AuxCSQty):
     newSum = 0 # 新规格格式 数量
     newSpecQtyList = [] # 新规格格式
     # print(f'reset_spec: {AuxCS}, {AuxCSQty}')
-    
+    originSum = sum(AuxCSQty.values())
+
     for auxs_item in sorted(AuxCS.get("AuxS", []), key=lambda x: x["AuxNumber"]):
         auxs_auxnumber = auxs_item["AuxNumber"]
         # 只取有下划线的尺码
         if '_' not in auxs_auxnumber:
             continue
-
-        item = {
-            "AuxS": auxs_item,
-            "Qty": 0.0
-        }
+        
         auxs_qty = 0.0
-        # if commonPrefix in auxs_auxnumber:
-        #     # 替换前缀
-        #     auxs_qty = AuxCSQty.get(auxs_auxnumber.replace(auxc, ''), 0.0)
-        #     newSum += auxs_qty
-        #     item['Qty'] = auxs_qty
-        # auxc_data = sorted(AuxCS.get("AuxC", []), key=lambda x: x["AuxNumber"])
-        # auxs_qty = AuxCSQty.get(auxs_auxnumber.replace(commonPrefix, ''), 0.0)
-        # auxs_qty = AuxCSQty.get(re.search(r'\d+', auxs_auxnumber.split('_')[1]).group(), 0.0)
-
         auxs_auxnumber_ = auxs_auxnumber.split('_')[1]
         auxs_qty = AuxCSQty.get(auxs_auxnumber_, 0.0)
+        item = {
+            "AuxS": auxs_item,
+            "Qty": auxs_qty
+        }
+        newSum += auxs_qty
 
-        originSum = sum(AuxCSQty.values())
         # 替换为前端选择的款型，组合
         auxc_data = AuxCs
         # 款型
         if len(auxc_data) > 0:
             # for auxc_item in auxc_data:
             for index, auxc_item in enumerate(auxc_data):
-                # if index > 0:
-                #     break
                 auxc_auxnumber = auxc_item["AuxNumber"]
-
-                # if auxc_auxnumber in auxs_auxnumber:
-                    # 替换前缀
-                # auxs_qty = AuxCSQty.get(auxs_auxnumber.replace(commonPrefix, ''), 0.0)
-                newSum += auxs_qty
-                item['Qty'] = auxs_qty
+                
+                # item['Qty'] = auxs_qty
                 item['AuxC'] = auxc_item
                 result["FlexList"].append(item) 
                 if auxs_qty > 0:
                     logging.info(f'尺码: {auxs_auxnumber}, 数量： {auxs_qty}')
                     newSpecQtyList.append(f"{auxs_auxnumber}{auxc_auxnumber}:{round(auxs_qty)}")
-                
         else:
             result["FlexList"].append(item) 
             if auxs_qty > 0:
-                newSum += auxs_qty
+                # newSum += auxs_qty
                 logging.info(f'尺码: {auxs_auxnumber}, 数量： {auxs_qty}')
                 newSpecQtyList.append(f"{auxs_auxnumber}:{round(auxs_qty)}")
         
@@ -173,8 +158,13 @@ def get_bills_specString(fBillNo, fNumber, table='T_PUR_POORDER', tableEntry='T_
     params = {"FNUMBER": fNumber, "FBILLNO": fBillNo}
 
     specString = conn.execute_query(sql, params)
+    if len(specString) == 0:
+        current_window = QApplication.activeWindow()  # 获取当前活动窗口
+        PopupWindow('e', "错误", f'单据编号【{fBillNo}】获取不到【{fNumber}】的信息', current_window).exec_()
+        return False, []
+
     logging.info(f'明细上的分码：{specString}')
-    return specString[0][0].split(',')
+    return True, specString[0][0].split(',')
 
 # 源规格 是否存在现物料尺码组
 def check_in_specList(fNumber, Auxss):
@@ -186,23 +176,19 @@ def check_in_specList(fNumber, Auxss):
     '''
     auxs_list = AuxCS.get('AuxS', [])
     # auxnumber_values = [item['AuxNumber'].replace(commonPrefix, '') for item in auxs_list if '_' in item['AuxNumber']]
+    # 只需要下划线的值
     auxnumber_values = [item['AuxNumber'] for item in auxs_list if '_' in item['AuxNumber']]
-    auxnumber_values = [item['AuxNumber'].split('_')[1] for item in auxs_list if '_' in item['AuxNumber']]
-
-    # if '_' in auxs_auxnumber:
-    #     auxs_auxnumber = auxs_auxnumber.split('_')[1]
-
-    
-    # Auxss = [item.replace(commonPrefix, '') for item in Auxss if '_' in item]
-    # Auxss = [item.replace(commonPrefix, '') for item in Auxss if '_' in item]
-    # print(Auxss, auxs_list, auxnumber_values)
+    #  同一取下划线右边的尺码值 做匹配
+    auxnumber_values = [item['AuxNumber'].split('_')[1] for item in auxs_list]
     for auxs_key in Auxss:
-        if auxs_key not in auxnumber_values:
+        auxs = auxs_key.split('_')[1]
+        # print(auxs_key, auxs, auxnumber_values)
+        if auxs not in auxnumber_values:
             tip = f'现物料不存在尺码值【{auxs_key}】！'
             logging.info(tip)
             current_window = QApplication.activeWindow()  # 获取当前活动窗口
             PopupWindow('e', "错误", tip, current_window).exec_()
-            return False
+            return False, []
     return True, AuxCS
 
 # 查询物料的可选尺码、款型
@@ -301,11 +287,13 @@ def reverse_cartesian_product(cartesian_product, data_dict):
     
     new_data_dict = {}
     for key, value in data_dict.items():
-        new_key = key
+        # 统一取下划线 右边
+        new_key = key.split('_')[1] if '_' in key else key
+
         for AuxC in AuxCs:
             # AuxSs = [s[:-1] if s.endswith(AuxC) else s for s in arr]
             new_key = key[:-1] if key.endswith(AuxC) else new_key
-        # print(new_key)
+            #new_key = new_key.split('_')[1] if '_' in new_key else new_key
         if new_key not in new_data_dict:
             new_data_dict[new_key] = value
     # print(new_data_dict)

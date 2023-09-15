@@ -1,4 +1,4 @@
-import sys, os, logging, re, time
+import sys, os, logging, re, time, datetime
 sys.path_importer_cache.clear()
 logging.basicConfig(filename="log.log", level=logging.INFO, format="%(asctime)s [%(levelname)s] (%(module)s:%(lineno)d) - %(message)s")
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox , QComboBox
@@ -40,6 +40,10 @@ class CreatedWindow(QMainWindow):
         self.setWindowIcon(QIcon(icon_path))
         # self.setWindowIcon(QIcon("32tool.ico"))  # 替换为图标文件的路径
 
+        self.units =[]
+        # 连接标签切换事件
+        self.tabWidget.currentChanged.connect(self.tab_changed)
+    
         # 连接数据库
         # conn = get_connection()
 
@@ -65,8 +69,6 @@ class CreatedWindow(QMainWindow):
         # 物料编码
         # self.fnumberText.lineEdit().textEdited.connect(self.filterComboBox)
         
-        # 初始化 单位值
-        initialize_units_box(self)
         # get_material_unit(self)
 
         # -- 页签2 -----------------------------------------------------------------------------------------------
@@ -83,8 +85,14 @@ class CreatedWindow(QMainWindow):
         self.materialsList = []
         '''绑定`获取明细` 使用lambda传递参数'''
         self.getBillsBtn.clicked.connect(lambda checked, arg=self : get_materials_box(arg))
+        # 单据编码 自填
+        self.billNoText.editingFinished.connect(lambda arg=self : get_materials_box(arg))
+
+        # 安装事件过滤器
+        # self.installEventFilter(self)
+
         self.materialsComboBox.currentIndexChanged.connect(self.materialSelected)
-        # 自填
+        # 物料编码 自填
         self.materialsComboBox.lineEdit().textEdited.connect(self.get_material_aux)
 
         # 刷新尺码
@@ -103,6 +111,20 @@ class CreatedWindow(QMainWindow):
 
         # -- 页签1 -----------------------------------------------------------------------------------------------
 
+    def tab_changed(self, index):
+        # 获取当前选定的标签的索引和文本
+        current_tab_text = self.tabWidget.tabText(index)
+        # 根据不同的标签触发不同的事件
+        if current_tab_text == "尺码款型":
+            # print("切换到标签页1, 尺码款型")
+            pass
+            # 在这里触发事件1的操作
+        elif current_tab_text == "物料单位":
+            # print("切换到标签页2, 物料单位")
+            if len(self.units) <= 0:
+                # 初始化 单位值
+                initialize_units_box(self)
+            
     '''页签2'''
     def updateUnit(self):
         global fUnitId
@@ -174,42 +196,31 @@ class CreatedWindow(QMainWindow):
         global fNumber, fMaterialId, table, tableEntry
         fNumber = None
         fMaterialId = None
-        fNumber = self.materialsComboBox.itemText(index)
+        fNumber = self.materialsComboBox.itemText(index).strip()
+
+        if len(fNumber) > 0:
         # fNumber = fNumber[:fNumber.find("【")].strip()
+            self.reserveAuxCSText.setPlainText('')
+            self.newAuxCSText.setPlainText('')
 
-        self.reserveAuxCSText.setPlainText('')
-        self.newAuxCSText.setPlainText('')
+            materialsList = self.materialsList
+            # 遍历列表中的元素（每个元素都是一个包含字典的列表）
+            for item_list in materialsList:
+                # 遍历包含字典的列表中的每个字典
+                for item_dict in item_list:
+                    item_text = item_dict['FNumber'] # 访问字典的键 'FNumber'
+                    # item_text = list(self.materialsList)[0][1]['FNumber']
 
-        materialsList = self.materialsList
-        # 遍历列表中的元素（每个元素都是一个包含字典的列表）
-        for item_list in materialsList:
-            # 遍历包含字典的列表中的每个字典
-            for item_dict in item_list:
-                item_text = item_dict['FNumber'] # 访问字典的键 'FNumber'
-                # item_text = list(self.materialsList)[0][1]['FNumber']
+                    if fNumber == item_text:
+                        # print(f"Matched index : {index} , item: {item_text}")
+                        fMaterialId = item_dict['FMaterialId']
+                        fName = item_dict['FName']
+                        fDemal = item_dict['FDemal']
+                        self.AuxCSText.setPlainText(fDemal)
 
-                if fNumber == item_text:
-                    # print(f"Matched index : {index} , item: {item_text}")
-                    fMaterialId = item_dict['FMaterialId']
-                    fName = item_dict['FName']
-                    fDemal = item_dict['FDemal']
-                    self.AuxCSText.setPlainText(fDemal)
-
-                    # if item_dict['changed']:
-                    #     arr = sp.get_bills_specString(fBillNo, fNumber, table, tableEntry)
-                    #     time.sleep(1)
-                    #     fDemal = ','.join(arr)
-                    #     item_dict['changed'] = False
-                    # print(f'current select {index} , the item : {fNumber}:{fName}, fDemal: {fDemal}')
-
-                    break
-        # # 获取是否开启
-        # aux_auc = sp.get_material_aux(fNumber)
-        # self.AuxS.setChecked(True if aux_auc.get(100001) else False)
-        # self.AuxC.setChecked(True if aux_auc.get(100002) else False)
-
-        # 获取物料尺码款型信息
-        self.get_material_aux(fNumber)
+                        break
+            # 获取物料尺码款型信息
+            self.get_material_aux(fNumber)
         
     def get_material_aux(self, text):
         global success, demal, demalTag, fNumber, AuxC
@@ -282,6 +293,26 @@ class CreatedWindow(QMainWindow):
                 conn.close()
         except Exception as e:
             logging.error(f'Error closing database connections')
+
+    # def eventFilter(self, obj, event):
+    #     # 检查是否发生鼠标点击事件
+    #     if event.type() == event.MouseButtonPress:
+    #         # 如果点击位置是窗口或非文本框部分，则使文本框失去焦点
+    #         if obj == self and event.target() != self.billNoText:
+    #             self.billNoText.clearFocus()
+    #     return super().eventFilter(obj, event)
+
+    # 单据编号，获取焦点后，再失去焦点。则重新获取明细
+    def mousePressEvent(self, event):
+        #current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        # 获取当前拥有焦点的部件
+        current_focus_widget = QApplication.focusWidget()
+        # print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), current_focus_widget, current_focus_widget != self.billNoText, self.billNoText.hasFocus())
+        # 如果有焦点的部件，清除焦点
+        if current_focus_widget and self.billNoText.hasFocus():
+            self.billNoText.clearFocus()
+            self.billNoText.editingFinished.emit()
+            # get_materials_box(self)
 
 # 单位下拉框赋值
 def initialize_units_box(self):
@@ -387,7 +418,7 @@ def update_material_unit(fMaterialId):
 # 明细下拉赋值
 def get_materials_box(self):
     global fBillNo, table, tableEntry
-    fBillNo = self.billNoText.text()
+    fBillNo = self.billNoText.text().strip()
 
     self.reserveAuxCSText.setPlainText('')
     self.newAuxCSText.setPlainText('')
@@ -480,54 +511,44 @@ def reset(self):
     # 获取物料的要拼接的款型
     AuxCs = current_AuxC(self.AuxC.isChecked())
     
-    arr = sp.get_bills_specString(fBillNo, fNumber, table, tableEntry)
-    # 延迟一下 数据库查询
-    time.sleep(1)
+    flag, arr = sp.get_bills_specString(fBillNo, fNumber, table, tableEntry)
+    if flag:
+        # 延迟一下 数据库查询
+        time.sleep(1)
+        specList, specQtyList = sp.split_spec(arr)
+        # print('specQtyList', specQtyList)
 
-    specList, specQtyList = sp.split_spec(arr)
-    # print('specQtyList', specQtyList)
+        # 取前缀有问题先不能取
+        # commonPrefix, AuxCSList, originSum = sp.common_prefix(specQtyList)
 
-# 取前缀有问题先不能取
-    # commonPrefix, AuxCSList, originSum = sp.common_prefix(specQtyList)
+        # print(commonPrefix, AuxCSList)
 
-    # print(commonPrefix, AuxCSList)
+        # AuxS：尺码,AuxC：款型
+        # AuxC, AuxS, AuxCSQty = sp.get_AuxC(AuxCSList)
+        # 只处理1个款型的数量
+        Auxss, Auxcs, AuxCSQty = sp.reverse_cartesian_product(specList, specQtyList)
 
-    # AuxS：尺码,AuxC：款型
-    # AuxC, AuxS, AuxCSQty = sp.get_AuxC(AuxCSList)
+        self.reserveAuxCSText.setPlainText(f'尺码: {Auxss}\n款型: {Auxcs}\n数量: {AuxCSQty}')
 
-    # 只处理1个款型的数量
-    Auxss, Auxcs, AuxCSQty = sp.reverse_cartesian_product(specList, specQtyList)
+        # print(AuxCSQty)
+        # 重设值
+        # print(f'AuxC: {AuxC}\nAuxS: {AuxS}\nAuxCSQty: {AuxCSQty}')
 
-    self.reserveAuxCSText.setPlainText(f'尺码: {Auxss}\n款型: {Auxcs}\n数量: {AuxCSQty}')
+        # 检查,一维内的尺码 是否在物料的可选尺码内
+        # flag, AuxCS = sp.check_in_specList(fNumber, AuxCs, commonPrefix, AuxS)
+        flag, AuxCS = sp.check_in_specList(fNumber, Auxss)
 
-    # print(AuxCSQty)
+        if (flag):
+        #     # JSON串,数量 拼接进去
+            success, demal, demalTag, newSum = sp.reset_spec(AuxCs, AuxCS, AuxCSQty)
+            self.newAuxCSText.setPlainText(demal)
 
-    # 重设值
-    # print(f'AuxC: {AuxC}\nAuxS: {AuxS}\nAuxCSQty: {AuxCSQty}')
-
-    # 检查,一维内的尺码 是否在物料的可选尺码内
-    # flag, AuxCS = sp.check_in_specList(fNumber, AuxCs, commonPrefix, AuxS)
-    flag, AuxCS = sp.check_in_specList(fNumber, Auxss)
-
-    # print(specTag)
-
-    # aux_auc = sp.get_material_aux(fNumber)
-    # self.AuxS.setChecked(lambda: True if aux_auc.get(100001) else False)  # 使用 lambda 设置勾选状态
-    # self.AuxC.setChecked(lambda: True if aux_auc.get(100002) else False)
-
-    # self.checkbox.isChecked():
-
-    if (flag):
-    #     # JSON串,数量 拼接进去
-        success, demal, demalTag, newSum = sp.reset_spec(AuxCs, AuxCS, AuxCSQty)
-        self.newAuxCSText.setPlainText(demal)
-
-    #     self.updateBtn.setEnabled(lambda: True if success else False)
-        # self.AuxC.setChecked(True if aux_auc.get(100002) else False)
-        if (success):
-            self.updateBtn.setEnabled(True if success else False)
-        # else:
-        #     self.updateBtn.setEnabled(False)
+        #     self.updateBtn.setEnabled(lambda: True if success else False)
+            # self.AuxC.setChecked(True if aux_auc.get(100002) else False)
+            if (success):
+                self.updateBtn.setEnabled(True if success else False)
+            # else:
+            #     self.updateBtn.setEnabled(False)
 
 def getTableFields(self):
     global table, tableEntry
@@ -559,7 +580,6 @@ def update_spec(self):
         if item_dict:
             item_dict['changed'] = True
             item_dict['FDemal'] = demal
-
 
 # 更新尺码款型 勾选（TODO判断库存）
 # def update_aux(self):
@@ -593,7 +613,8 @@ def auxCChenkBox_changed(chenked, auxPropertyId, self):
         else:
             comboBox.setVisible(False)
     else:
-        self.AuxS.setChecked(True) if auxPropertyId == 100001 else self.AuxC.setChecked(True)
+        self.AuxS.setChecked(not chenked) if auxPropertyId == 100001 else self.AuxC.setChecked(not chenked)
+        # self.AuxS.setChecked(True) if auxPropertyId == 100001 else self.AuxC.setChecked(True)
 
 
 def main():
@@ -619,7 +640,6 @@ def mul_AuxC(window):
     comboBox = CheckableComboBox()
     comboBox.addItems(comunes)
     comboBox.setFixedSize(50, 30)
-
     comboBox.setObjectName("mulAuxC")
 
     # 设置 comboBox1 在窗口上的位置
@@ -637,6 +657,7 @@ def mul_AuxC(window):
     layout.addWidget(comboBox)
     # 将布局设置给 QGroupBox
     group_box.setLayout(layout)
+    comboBox.setVisible(False)
 
 if __name__ == "__main__":
     # print('开始')
