@@ -5,9 +5,7 @@ block_cipher = None
 
 
 a = Analysis(
-    ['E:\\Dev\\ppython\\Jodoll\\designer.py', 
-    'E:\\Dev\\ppython\\Jodoll\\Ui_once.py', 
-    'E:\\Dev\\ppython\\Jodoll\\oracle_long_conn.py'],
+    ['E:\\Dev\\ppython\\Jodoll\\designer.py'],
     pathex=[],
     binaries=[],
     datas=[('E:\\Dev\\ppython\\Jodoll', './')],
