@@ -413,7 +413,8 @@ def update_material_unit(fMaterialId):
 
         str = f"物料：{fNumber}，单位【{fNuit}】更新成功!"
         logging.info(str)
-        PopupWindow(window, 'i', "提示：", str).exec_()
+        PopupWindow('i', "提示：", str, QApplication.activeWindow()).exec_()
+        
 # -- -----------------------------------------------------------------------------------------------
 # 明细下拉赋值
 def get_materials_box(self):
