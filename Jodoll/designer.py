@@ -75,7 +75,7 @@ class CreatedWindow(QMainWindow):
 
         # 单据类型 测试数据
         # self.billsTypeList = [(1, '采购订单', 'T_PUR_POORDER', 'T_PUR_POORDERENTRY'), (2, '收料通知单', 'T_PUR_RECEIVE', 'T_PUR_RECEIVEENTRY'), (3, '销售订单', 'T_SAL_ORDER', 'T_SAL_ORDERENTRY'), (4, '委外订单', 'T_SUB_REQORDER', 'T_SUB_REQORDERENTRY')]
-        self.billsTypeList = [(1, '采购订单', 'T_PUR_POORDER', 'T_PUR_POORDERENTRY', 'FQTY', 'F_SCAG_FDEMAL', 'F_SCAG_FDEMAL_TAG'), (2, '收料通知单', 'T_PUR_RECEIVE', 'T_PUR_RECEIVEENTRY', 'FACTRECEIVEQTY', 'F_SCAG_FDEMAL', 'F_SCAG_FDEMAL_TAG'), (3, '销售订单', 'T_SAL_ORDER', 'T_SAL_ORDERENTRY', 'FQTY', 'F_SCAG_LARGETEXT', 'F_SCAG_LARGETEXT_TAG'), (4, '委外订单', 'T_SUB_REQORDER', 'T_SUB_REQORDERENTRY', 'FQTY', 'F_SCAG_FDEMAL', 'F_SCAG_FDEMAL_TAG')]
+        self.billsTypeList = [(1, '采购订单', 'T_PUR_POORDER', 'T_PUR_POORDERENTRY', 'FQTY', 'F_SCAG_FDEMAL', 'F_SCAG_FDEMAL_TAG'), (2, '采购申请单', 'T_PUR_REQUISITION', 'T_PUR_REQENTRY', 'FREQQTY', 'F_SCAG_FDEMAL', 'F_SCAG_FDEMAL_TAG'), (3, '收料通知单', 'T_PUR_RECEIVE', 'T_PUR_RECEIVEENTRY', 'FACTRECEIVEQTY', 'F_SCAG_FDEMAL', 'F_SCAG_FDEMAL_TAG'), (4, '销售订单', 'T_SAL_ORDER', 'T_SAL_ORDERENTRY', 'FQTY', 'F_SCAG_LARGETEXT', 'F_SCAG_LARGETEXT_TAG'), (5, '委外订单', 'T_SUB_REQORDER', 'T_SUB_REQORDERENTRY', 'FQTY', 'F_SCAG_FDEMAL', 'F_SCAG_FDEMAL_TAG')]
         for row in self.billsTypeList:
             self.billsTypeComboBox.addItem(row[1])
         
@@ -406,8 +406,9 @@ def update_material_unit(fMaterialId):
         update_query4 = f"UPDATE KINGDEE00.T_BD_MaterialPurchase SET FPURCHASEUNITID = {fUnitId}, FPURCHASEPRICEUNITID = {fUnitId} WHERE FMATERIALID IN ({fMaterialId})"
         update_query5 = f"UPDATE KINGDEE00.T_BD_MaterialProduce SET FPRODUCEUNITID = {fUnitId}, FBOMUNITID = {fUnitId}, FMINISSUEUNITID = {fUnitId} WHERE FMATERIALID IN ({fMaterialId})"
         update_query6 = f"UPDATE KINGDEE00.T_BD_MaterialSubcon SET FSUBCONUNITID = {fUnitId}, FSUBCONPRICEUNITID = {fUnitId} WHERE FMATERIALID IN ({fMaterialId})"
-
-        update_queries = [update_query1, update_query2, update_query3, update_query4, update_query5, update_query6]
+        update_query7 = f"UPDATE KINGDEE00.T_STK_INVBAL SET FBASEUNITID = {fUnitId} WHERE FMATERIALID IN ({fMaterialId})"
+        update_query8 = f"UPDATE KINGDEE00.T_STK_INVENTORY SET FBASEUNITID = {fUnitId}, FSTOCKUNITID = {fUnitId} WHERE FMATERIALID IN ({fMaterialId})"
+        update_queries = [update_query1, update_query2, update_query3, update_query4, update_query5, update_query6, update_query7, update_query8]
         # 更新
         conn.execute_transaction(update_queries)
 

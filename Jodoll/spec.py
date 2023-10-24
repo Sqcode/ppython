@@ -177,11 +177,15 @@ def check_in_specList(fNumber, Auxss):
     auxs_list = AuxCS.get('AuxS', [])
     # auxnumber_values = [item['AuxNumber'].replace(commonPrefix, '') for item in auxs_list if '_' in item['AuxNumber']]
     # 只需要下划线的值
-    auxnumber_values = [item['AuxNumber'] for item in auxs_list if '_' in item['AuxNumber']]
+    # auxnumber_values = [item['AuxNumber'] for item in auxs_list if '_' in item['AuxNumber']]
     #  同一取下划线右边的尺码值 做匹配
-    auxnumber_values = [item['AuxNumber'].split('_')[1] for item in auxs_list]
+    auxnumber_values = [item['AuxNumber'].split('_')[1] for item in auxs_list if '_' in item['AuxNumber']]
+
     for auxs_key in Auxss:
-        auxs = auxs_key.split('_')[1]
+        if '_' in auxs_key:
+            auxs = auxs_key.split('_')[1]
+        else :
+            auxs = auxs_key
         # print(auxs_key, auxs, auxnumber_values)
         if auxs not in auxnumber_values:
             tip = f'现物料不存在尺码值【{auxs_key}】！'
