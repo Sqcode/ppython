@@ -6,7 +6,8 @@ logging.basicConfig(filename="log.txt",level=logging.DEBUG,format= "%(asctime)s 
 if __name__ == '__main__':
     # print(1)
     # header = util.get_headers()
-    # print(header)
+    if 0:
+        print(0)
     # logging.debug(header)
 
     # desktop_path = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
@@ -16,5 +17,5 @@ if __name__ == '__main__':
     # print('{:^10d}'.format(3567))
     # print(f"{0:%>10}")
 
-    logging.debug(f" Query: {1}, Param: {2}, Result: {3}")
+    # logging.debug(f" Query: {1}, Param: {2}, Result: {3}")
 
