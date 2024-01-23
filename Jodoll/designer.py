@@ -407,7 +407,7 @@ def update_material_unit(fMaterialId):
         update_query5 = f"UPDATE KINGDEE00.T_BD_MaterialProduce SET FPRODUCEUNITID = {fUnitId}, FBOMUNITID = {fUnitId}, FMINISSUEUNITID = {fUnitId} WHERE FMATERIALID IN ({fMaterialId})"
         update_query6 = f"UPDATE KINGDEE00.T_BD_MaterialSubcon SET FSUBCONUNITID = {fUnitId}, FSUBCONPRICEUNITID = {fUnitId} WHERE FMATERIALID IN ({fMaterialId})"
         update_query7 = f"UPDATE KINGDEE00.T_STK_INVBAL SET FBASEUNITID = {fUnitId} WHERE FMATERIALID IN ({fMaterialId})"
-        update_query8 = f"UPDATE KINGDEE00.T_STK_INVENTORY SET FBASEUNITID = {fUnitId}, FSTOCKUNITID = {fUnitId} WHERE FMATERIALID IN ({fMaterialId})"
+        update_query8 = f"UPDATE KINGDEE00.T_STK_INVENTORY SET FBASEUNITID = {fUnitId}, FSTOCKUNITID = {fUnitId}, FSECUNITID = 0 WHERE FMATERIALID IN ({fMaterialId})"
         update_queries = [update_query1, update_query2, update_query3, update_query4, update_query5, update_query6, update_query7, update_query8]
         # 更新
         conn.execute_transaction(update_queries)
