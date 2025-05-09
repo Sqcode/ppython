@@ -5,6 +5,7 @@ dist.tar
 /images
 /files
 /国外疫情数据
+/node_moudles
 __pycache__
 
 # local env files

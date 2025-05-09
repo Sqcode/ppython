@@ -31,17 +31,29 @@ def parse_ono_pages(html):
 
 # {"approve":0,"assistAwardInfo":{"avatar":"","celebrityId":0,"celebrityName":"","rank":0,"title":""},"avatarurl":"https://img.meituan.net/maoyanuser/0d20974fe7a2dcb726680f4d94493b8511096.png","cityName":"北京","content":"刘德华演技在线，画面真美，剧情太烂！","id":1143035845,"isMajor":false,"juryLevel":0,"movieId":341516,"nick":"zhangsq0812","nickName":"zhangsq0812","oppose":0,"pro":false,"reply":0,"score":0.5,"spoiler":0,"startTime":"2021-09-10 11:55:57","supportComment":true,"supportLike":true,"sureViewed":1,"tagList":{"fixed":[{"id":2,"name":"购票差评"},{"id":4,"name":"购票"}]},"time":"2021-09-10 11:55","userId":220211944,"userLevel":0,"vipType":0}
 #保存数据到文本文档
+# def save_to_txt(url, filepath=os.path.join(__dir__, f'../files/{str(round(time.time() * 1000))}.txt')):
+#     html = util.get_html(url)
+#     # print(filepath)
+#     try:
+#         cmts = parse_ono_page(html)
+#     except Exception:
+#         raise SkipException('解析JSON异常') 
+#     for item in cmts:
+#         # print(item)
+#         with open(filepath,'a', encoding='utf-8') as f:
+#             f.write(item['date'] + ',' + item['nickname'] + ',' + item['city'] + ',' +str(item['rate'])+','+item['comment']+'\n')
+
 def save_to_txt(url, filepath=os.path.join(__dir__, f'../files/{str(round(time.time() * 1000))}.txt')):
     html = util.get_html(url)
-    # print(filepath)
     try:
         cmts = parse_ono_page(html)
     except Exception:
         raise SkipException('解析JSON异常') 
+    
     for item in cmts:
-        # print(item)
-        with open(filepath,'a', encoding='utf-8') as f:
-            f.write(item['date'] + ',' + item['nickname'] + ',' + item['city'] + ',' +str(item['rate'])+','+item['comment']+'\n')
+        with open(filepath, 'a', encoding='utf-8-sig', errors='ignore') as f:
+            line = f"{item['date']},{item['nickname']},{item['city']},{item['rate']},{item['comment']}\n"
+            f.write(line)
 
 # 获取的评论可能有重复，为了最终统计的真实性，需做去重处理
 def delete_repeat(old,new):
@@ -242,11 +254,11 @@ class ThreadCrawl(threading.Thread):
         
 if __name__ =='__main__':
     # print(get_movies('怒火·重案'))
-    movie_name = '长津湖'
+    movie_name = '饺子皇后'
     scrawl_mv(movie_name)
-
     filepath = f'files/{movie_name}.txt'
-    
+    # 确保存储文件的目录存在
+    os.makedirs(os.path.dirname(filepath), exist_ok=True)
     if os.path.exists(filepath):
         print(os.path.abspath(filepath))
-        maoyan_jieba.analysis(os.path.abspath(filepath))
+        # maoyan_jieba.analysis(os.path.abspath(filepath))

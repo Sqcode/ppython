@@ -23,8 +23,7 @@ root_path = util.JarProjectPath.project_root_path('py')
 @util.run_time
 def analysis(filepath):
     with open(filepath, encoding='UTF-8') as f:
-        data = pd.read_csv(f,sep=',',header=None,encoding='UTF-8',names=['date','nickname','city','rate','comment'])
-    
+        data = pd.read_csv(f,sep=',',header=None,encoding='UTF-8',names=['date','nickname','city','rate','comment'], on_bad_lines='skip' )
     # 获取文件的拼音，作为文件名。
     n, f = os.path.basename(filepath).split('.')[:2]
     filename = util.pinyin(n)
@@ -77,8 +76,8 @@ def jb(data, filename=str(round(time.time() * 1000))):
     stopwords = STOPWORDS.copy()
     # print(" STOPWORDS.copy()",help(STOPWORDS.copy()))
     #可以自行加多个屏蔽词，也可直接下载停用词表格
-    stopwords.add("好看")
-    stopwords.add("喜欢")
+    # stopwords.add("好看")
+    # stopwords.add("喜欢")
     # print(stopwords)
     # print(wl_space_split)
     #设置词云参数
@@ -140,7 +139,7 @@ def geo_heatmap_dynamic(data, filename=str(round(time.time() * 1000))) -> Geo:
     # return c
 
 if __name__ =='__main__':
-    filepath = r'files\我的青春有个你.txt'
+    filepath = r'files\水饺皇后.txt'
     analysis(filepath)
     # print(util.pinyin('我爱你'))
     print(1)
