@@ -32,7 +32,7 @@ url = "https://cn.bing.com/"
 option = webdriver.ChromeOptions()
 # 不打开窗口 ， 静默模式
 # option.add_argument('--headless')
-option.headless = True
+option.headless = False
 
 # 防止打印一些无用的日志
 option.add_experimental_option("excludeSwitches", ['enable-automation', 'enable-logging'])
